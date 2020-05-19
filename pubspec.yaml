@@ -1,8 +1,8 @@
 name: weak_map
 description: WeakMap is a map of key/value pairs in which the keys are weakly referenced. WeakContainer is a weak-reference that only lets you check if some object it the same you had before.
 version: 1.0.0
-author: Marcelo Glasberg
-homepage: glasberg.dev
+author: Marcelo Glasberg <marcglasberg@gmail.com>
+homepage: https://github.com/marcglasberg/weak_map
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
