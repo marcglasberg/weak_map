@@ -1,8 +1,3 @@
-import 'dart:collection';
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
-
 /// A weak-container is similar, but not exactly, a weak-reference to some object.
 /// Dart doesn't have real weak-references, so the best you can do here is to check
 /// that some object is the same you had before.
@@ -31,14 +26,15 @@ class WeakContainer {
         _isNull = (value == null);
 
   bool contains(Object value) {
-    if (value == null)
+    if (value == null) {
       return _isNull;
-    else if (_value == value)
-      return true;
-    else if (_expando != null && _allowedInExpando(value) && _expando[value] == true)
-      return true;
-    else
-      return false;
+    } else {
+      if (_value == value) {
+        return true;
+      } else {
+        return (_expando != null && _allowedInExpando(value) && _expando[value] == true);
+      }
+    }
   }
 
   void clear() {

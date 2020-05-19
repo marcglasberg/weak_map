@@ -94,6 +94,28 @@ and will print `false` if it's a different object, compared by identity.
 If all references to the original `obj` have been destroyed,
 the weak-container will **not** prevent `obj` to be garbage-collected.
 
+<br>
+
+### Why doesn't Dart allow for real weak-references, anyway?
+
+Because the creators of Dart don't want the GC (garbage-collector) to be "visible".
+
+Expandos are not equivalent to weak-references (meaning the Java `WeakReference` behavior).
+A weak reference is one that doesn't keep the referenced object alive, 
+so the weak reference value may change to `null` at any time in the program. 
+This makes the GC visible in the program.
+
+Expandos are maps (from key to value) which won't keep the key alive. 
+There is no way to distinguish an Expando that garbage collects the entry when the key dies, 
+and one that doesn't, because you don't have the key to do the lookup anymore.
+
+Basically, it means that an expando keeps a value alive 
+as long as you have a reference to both the expando and the key, 
+and after that, you can't check if the entry is there or not.
+With expandos, the GC need not be part of the language specification. 
+It's just an optimization that implementations (are expected to) do to release memory that isn't needed anymore. 
+Disabling the GC will not change the behavior of programs unless they run out of memory.
+
 ***
 
 *The Flutter packages I've authored:* 
@@ -107,6 +129,14 @@ the weak-container will **not** prevent `obj` to be garbage-collected.
 * <a href="https://pub.dev/packages/indexed_list_view">indexed_list_view</a> 
 * <a href="https://pub.dev/packages/animated_size_and_fade">animated_size_and_fade</a>
 * <a href="https://pub.dev/packages/assorted_layout_widgets">assorted_layout_widgets</a>
+
+*My Medium Articles:*
+* <a href="https://medium.com/flutter-community/https-medium-com-marcglasberg-async-redux-33ac5e27d5f6">Async Redux: Flutter’s non-boilerplate version of Redux</a> (versions: <a href="https://medium.com/flutterando/async-redux-pt-brasil-e783ceb13c43">Português</a>)
+* <a href="https://medium.com/flutter-community/i18n-extension-flutter-b966f4c65df9">i18n_extension</a> (versions: <a href="https://medium.com/flutterando/qual-a-forma-f%C3%A1cil-de-traduzir-seu-app-flutter-para-outros-idiomas-ab5178cf0336">Português</a>)
+* <a href="https://medium.com/flutter-community/flutter-the-advanced-layout-rule-even-beginners-must-know-edc9516d1a2">Flutter: The Advanced Layout Rule Even Beginners Must Know</a> (versions: <a href="https://habr.com/ru/post/500210/">русский</a>)
+
+*My article in the official Flutter documentation*:
+* <a href="https://flutter.dev/docs/development/ui/layout/constraints">Understanding constraints</a>
 
 <br>_Marcelo Glasberg:_<br>
 _https://github.com/marcglasberg_<br>

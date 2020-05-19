@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 /// A WeakMap lets you garbage-collect its keys.
 /// Please note: The **[key]** can be garbage-collected, not the [value].
@@ -65,8 +65,9 @@ class WeakMap<K, V> {
   void addByIdentity({@required K key, @required V value}) {
     if (_allowedInExpando(key)) {
       _expando[key] = value;
-    } else
+    } else {
       _map[key] = value;
+    }
   }
 
   void add({@required K key, @required V value}) {
@@ -74,23 +75,27 @@ class WeakMap<K, V> {
       var obj = Object();
       _equalsMap[key] = obj;
       _expando[obj] = value;
-    } else
+    } else {
       _map[key] = value;
+    }
   }
 
   bool contains(K key) => get(key) != null;
 
   V get(K key) {
-    if (_map.containsKey(key))
+    if (_map.containsKey(key)) {
       return _map[key];
-    else {
+    } else {
       var obj = _equalsMap[key];
-      if (obj != null)
+      if (obj != null) {
         return _expando[obj];
-      else if (!_allowedInExpando(key))
-        return null;
-      else
-        return _expando[key];
+      } else {
+        if (!_allowedInExpando(key)) {
+          return null;
+        } else {
+          return _expando[key];
+        }
+      }
     }
   }
 
@@ -98,9 +103,13 @@ class WeakMap<K, V> {
     _map.remove(key);
 
     var obj = _equalsMap[key];
-    if (obj != null) _expando[obj] = null;
+    if (obj != null) {
+      _expando[obj] = null;
+    }
 
-    if (_allowedInExpando(key)) _expando[key] = null;
+    if (_allowedInExpando(key)) {
+      _expando[key] = null;
+    }
   }
 
   void clear() {
