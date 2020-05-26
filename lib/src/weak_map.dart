@@ -41,18 +41,14 @@ import 'package:meta/meta.dart';
 /// syntaxes `var y = map[x]` or `var y = map.get(x)`.
 ///
 /// 3. Doing `map[x] = y` is equivalent to `map.add(key: obj, value: 42)`,
-/// and will mean the object is later retrieved by **equality**.
-/// However, you can also add the object so that it is later returned by **identity**.
-/// To that end, use the syntax `map.addByIdentity(key: obj, value: 42)`.
+/// but the object will always be retrieved by **identity**.
 ///
 class WeakMap<K, V> {
   final Map<K, V> _map;
-  final Map<K, Object> _equalsMap;
   Expando<V> _expando;
 
   WeakMap()
       : _map = {},
-        _equalsMap = {},
         _expando = Expando();
 
   static bool _allowedInExpando(Object value) =>
@@ -62,7 +58,7 @@ class WeakMap<K, V> {
 
   V operator [](K key) => get(key);
 
-  void addByIdentity({@required K key, @required V value}) {
+  void add({@required K key, @required V value}) {
     if (_allowedInExpando(key)) {
       _expando[key] = value;
     } else {
@@ -70,42 +66,13 @@ class WeakMap<K, V> {
     }
   }
 
-  void add({@required K key, @required V value}) {
-    if (_allowedInExpando(key)) {
-      var obj = Object();
-      _equalsMap[key] = obj;
-      _expando[obj] = value;
-    } else {
-      _map[key] = value;
-    }
-  }
-
   bool contains(K key) => get(key) != null;
 
-  V get(K key) {
-    if (_map.containsKey(key)) {
-      return _map[key];
-    } else {
-      var obj = _equalsMap[key];
-      if (obj != null) {
-        return _expando[obj];
-      } else {
-        if (!_allowedInExpando(key)) {
-          return null;
-        } else {
-          return _expando[key];
-        }
-      }
-    }
-  }
+  V get(K key) =>
+      _map.containsKey(key) ? _map[key] : (_allowedInExpando(key) ? _expando[key] : null);
 
   void remove(K key) {
     _map.remove(key);
-
-    var obj = _equalsMap[key];
-    if (obj != null) {
-      _expando[obj] = null;
-    }
 
     if (_allowedInExpando(key)) {
       _expando[key] = null;
@@ -114,7 +81,6 @@ class WeakMap<K, V> {
 
   void clear() {
     _map.clear();
-    _equalsMap.clear();
     _expando = Expando();
   }
 }

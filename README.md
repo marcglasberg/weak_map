@@ -69,9 +69,7 @@ garbage-collected. All other types of object may be garbage-collected.
 syntaxes `var y = map[x]` or `var y = map.get(x)`.
 
 3. Doing `map[x] = y` is equivalent to `map.add(key: obj, value: 42)`,
-and will mean the object is later retrieved by **equality**.
-However, you can also add the object so that it is later returned by **identity**.
-To that end, use the syntax `map.addByIdentity(key: obj, value: 42)`.
+but the object is later retrieved by **identity**.
 
 <br>
 

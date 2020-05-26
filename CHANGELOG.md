@@ -1,4 +1,8 @@
-## [1.0.5] - 2020/05/19
+## [1.1.0] - 2020/05/26
+
+* Add is by identity.
+
+## [1.0.6] - 2020/05/19
 
 * Removed dependency on Flutter (it's now pure Dart).
 
