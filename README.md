@@ -1,3 +1,5 @@
+[![pub package](https://img.shields.io/pub/v/weak_map.svg)](https://pub.dartlang.org/packages/weak_map)
+
 # weak_map
 
 This package contains the classes:
