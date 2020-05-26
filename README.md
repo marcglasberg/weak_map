@@ -55,7 +55,7 @@ map.clear()
 map.contains("John"))
 ```
 
-However, adding some null value to the map is the same as removing the key:
+However, adding some `null` value to the map is the same as removing the key:
 
 ```dart
 map["John"] = null; // Same as map.remove("John")
@@ -70,7 +70,7 @@ garbage-collected. All other types of object may be garbage-collected.
 2. To retrieve a value added to the map, you can use the equivalent
 syntaxes `var y = map[x]` or `var y = map.get(x)`.
 
-3. Doing `map[x] = y` is equivalent to `map.add(key: obj, value: 42)`,
+3. Doing `map[x] = y` is equivalent to `map.add(key: x, value: y)`,
 but the object is later retrieved by **identity**.
 
 <br>
