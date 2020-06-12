@@ -133,8 +133,8 @@ Disabling the GC will not change the behavior of programs unless they run out of
 
 ## Cache
 
-Suppose you have some **immutable** information, which we call "states", and some parameters.
-We want to perform some expensive process (calculation, selection filtering etc) over the states,
+Suppose you have some **immutable** information, which we call "state", and some parameters.
+We want to perform some expensive process (calculation, selection filtering etc) over the state,
 and we want to cache the result. 
   
 For example, suppose you want to filter an **immutable list of millions of users**, 
@@ -166,7 +166,7 @@ and then return it when the `filter` function is called again with the same `use
 If the function is called with a **different** `users` and/or `text`, 
 it will recalculate and cache the new result.
 
-However, it treats the states and the parameters differently. 
+However, it treats the state and the parameter differently. 
 If you call the function while keeping the **same state** and changing only the parameter, 
 it will cache all the results, one for each parameter.
 
@@ -175,10 +175,11 @@ it will delete all of its previous cached information,
 since it understands that they are no longer useful.
 And even if you don't call that function ever again, it will delete the cached information if it detects
 that the state is no longer used in other parts of the program.
-In other words, it keeps the cached information in weak-map, 
+In other words, it keeps the cached information in a weak-map, 
 so that the cache will not hold to old information and have a negative impact in memory usage.  
     
-For the moment, these six methods are provided, which combine 1 or 2 states with 0, 1 or 2 parameters:
+For the moment, the following six methods are provided, 
+which combine 1 or 2 states with 0, 1 or 2 parameters:
 
 ```dart
 cache1_0((state) => () => ...);
@@ -193,12 +194,13 @@ I have created only those above, because for my own usage I never required more 
 Please, open an <a href="https://github.com/marcglasberg/weak_map/issues">issue</a> 
 to ask for more variations in case you feel the need.
 
-**Note:** These cache functions are similar to the ones found in the
+**Note:** These cache functions are similar to the "createSelector" functions found in the
 <a href="https://pub.dev/packages/reselect">reselect</a> package.
 The differences are: First, here you can keep any number of cached results for each function,
-one for each time the function is called with the same states and different parameters.
+one for each time the function is called with the same state and different parameters.
 Meanwhile, the reselect package only keeps a single cached result per function.
-Second, here it discards the cached information when the state changes or is no longer used.
+Second, here it discards the cached information when the state changes 
+or is no longer used in other parts of the program.
 Meanwhile, the reselect package will always keep the states and cached results in memory.
 
 <br>

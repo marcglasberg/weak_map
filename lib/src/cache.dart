@@ -107,22 +107,25 @@ typedef F2_0<R, S1, S2> = R2_0<R> Function(S1, S2);
 
 F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
   WeakContainer _s1, _s2;
-  WeakMap<_PairIdentical, R> weakMap;
+  WeakMap<S1, WeakMap<S2, R>> weakMap1;
+  WeakMap<S2, R> weakMap2;
 
   return (S1 s1, S2 s2) {
-    var parS = _PairIdentical(s1, s2);
     return () {
       if (_s1 == null || _s2 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
-        weakMap = WeakMap();
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
+
         var result = f(s1, s2)();
-        weakMap[parS] = result;
+        weakMap1 = WeakMap();
+        weakMap2 = WeakMap();
+        weakMap2[s2] = result;
+        weakMap1[s1] = weakMap2;
         return result;
       }
       //
       else {
-        return weakMap[parS];
+        return weakMap1[s1][s2];
       }
     };
   };
@@ -135,24 +138,27 @@ typedef F2_1<R, S1, S2, P1> = R2_1<R, P1> Function(S1, S2);
 
 F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
   WeakContainer _s1, _s2;
-  WeakMap<_PairIdentical, Map<P1, R>> weakMap;
+  WeakMap<S1, WeakMap<S2, Map<P1, R>>> weakMap1;
+  WeakMap<S2, Map<P1, R>> weakMap2;
 
   return (S1 s1, S2 s2) {
-    var parS = _PairIdentical(s1, s2);
     return (P1 p1) {
       if (_s1 == null || _s2 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
-        weakMap = WeakMap();
-        Map<P1, R> map = HashMap();
-        weakMap[parS] = map;
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
+
         var result = f(s1, s2)(p1);
+        weakMap1 = WeakMap();
+        weakMap2 = WeakMap();
+        Map<P1, R> map = HashMap();
         map[p1] = result;
+        weakMap2[s2] = map;
+        weakMap1[s1] = weakMap2;
         return result;
       }
       //
       else {
-        Map<P1, R> map = weakMap[parS];
+        Map<P1, R> map = weakMap1[s1][s2];
         assert(map != null);
         if (!map.containsKey(p1)) {
           var result = f(s1, s2)(p1);
@@ -173,25 +179,28 @@ typedef F2_2<R, S1, S2, P1, P2> = R2_2<R, P1, P2> Function(S1, S2);
 
 F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
   WeakContainer _s1, _s2;
-  WeakMap<_PairIdentical, Map<_Pair, R>> weakMap;
+  WeakMap<S1, WeakMap<S2, Map<_Pair<P1, P2>, R>>> weakMap1;
+  WeakMap<S2, Map<_Pair<P1, P2>, R>> weakMap2;
 
   return (S1 s1, S2 s2) {
-    var parS = _PairIdentical(s1, s2);
     return (P1 p1, P2 p2) {
       var par = _Pair(p1, p2);
       if (_s1 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
-        weakMap = WeakMap();
-        Map<_Pair, R> map = HashMap();
-        weakMap[parS] = map;
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
+
         var result = f(s1, s2)(p1, p2);
+        weakMap1 = WeakMap();
+        weakMap2 = WeakMap();
+        Map<_Pair<P1, P2>, R> map = HashMap();
         map[par] = result;
+        weakMap2[s2] = map;
+        weakMap1[s1] = weakMap2;
         return result;
       }
       //
       else {
-        Map<_Pair, R> map = weakMap[parS];
+        Map<_Pair<P1, P2>, R> map = weakMap1[s1][s2];
         assert(map != null);
         if (!map.containsKey(par)) {
           var result = f(s1, s2)(p1, p2);
@@ -203,26 +212,6 @@ F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
       }
     };
   };
-}
-
-// /////////////////////////////////////////////////////////////////////////////////////////////////
-
-class _PairIdentical<X, Y> {
-  final X x;
-  final Y y;
-
-  _PairIdentical(this.x, this.y);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _PairIdentical &&
-          runtimeType == other.runtimeType &&
-          identical(x, other.x) &&
-          identical(y, other.y);
-
-  @override
-  int get hashCode => x.hashCode ^ y.hashCode;
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:weak_map/src/cache.dart';
+import 'package:weak_map/weak_map.dart';
 
 void main() {
-  var stateNames = ["Juan", "Anna", "Bill", "Zack", "Arnold", "Amanda"];
+  var stateNames = List<String>.unmodifiable(["Juan", "Anna", "Bill", "Zack", "Arnold", "Amanda"]);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +45,7 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 1 state with 1 parameter.', () {
     //
@@ -88,7 +88,7 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 1 state with 2 parameters.', () {
     //
@@ -152,6 +152,7 @@ void main() {
     var memoA1 = selector(stateNames, 1)();
     var memoA2 = selector(stateNames, 1)();
     expect(memoA1, ["Anna"]);
+    expect(memoA2, ["Anna"]);
     expect(identical(memoA1, memoA2), isTrue);
 
     var memoB1 = selector(stateNames, 2)();
@@ -282,6 +283,55 @@ void main() {
     var memoA5 = selector(stateNames, 1)("A", "a");
     expect(memoA5, ["Anna"]);
     expect(identical(memoA5, memoA1), isFalse);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Changing the second or the first state, it should forget the cached value.', () {
+    //
+    var stateNames1 = List<String>.unmodifiable(["A1a", "A2a", "A3x", "B4a", "B5a", "B6x"]);
+
+    var selector =
+        cache2_2((List<String> names, int limit) => (String startString, String endString) {
+              return names
+                  .where((str) => str.startsWith(startString) && str.endsWith(endString))
+                  .take(limit)
+                  .toList();
+            });
+
+    var memo1 = selector(stateNames1, 1)("A", "a");
+    expect(memo1, ["A1a"]);
+
+    var memo2 = selector(stateNames1, 2)("A", "a");
+    expect(memo2, ["A1a", "A2a"]);
+
+    var memo3 = selector(stateNames1, 1)("A", "a");
+    expect(memo3, ["A1a"]);
+
+    var memo4 = selector(stateNames1, 2)("A", "a");
+    expect(memo4, ["A1a", "A2a"]);
+
+    expect(identical(memo1, memo3), isFalse);
+    expect(identical(memo2, memo4), isFalse);
+
+    // ---
+
+    var stateNames2 = List<String>.unmodifiable(["A1a", "A2a", "A3x", "B4a", "B5a", "B6x"]);
+
+    var memo5 = selector(stateNames1, 1)("A", "a");
+    expect(memo5, ["A1a"]);
+
+    var memo6 = selector(stateNames2, 1)("A", "a");
+    expect(memo6, ["A1a"]);
+
+    var memo7 = selector(stateNames1, 1)("A", "a");
+    expect(memo7, ["A1a"]);
+
+    var memo8 = selector(stateNames2, 1)("A", "a");
+    expect(memo8, ["A1a"]);
+
+    expect(identical(memo5, memo7), isFalse);
+    expect(identical(memo6, memo8), isFalse);
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
