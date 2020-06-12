@@ -5,13 +5,20 @@
 This package contains the classes:
  * **WeakMap**  
  * **WeakContainer**
+ 
+And also the functions:
+ * **cache1_0**
+ * **cache1_1**
+ * **cache1_2**
+ * **cache2_0**
+ * **cache2_1**
+ * **cache2_2**
 
 ### Why is this package useful?
 
-Dart doesn't allow for real <a href="https://en.wikipedia.org/wiki/Weak_reference">weak-references</a>, 
+1. Dart doesn't allow for real <a href="https://en.wikipedia.org/wiki/Weak_reference">weak-references</a>, 
 but this package allows you to go as close as possible 
 (internally it uses the <a href="https://api.flutter.dev/flutter/dart-core/Expando-class.html">Expando</a> class).
-
 The Dart engine stores a value in memory while it is reachable (and can potentially be used).
 Usually, keys in a map are considered reachable and kept in memory while the map itself is in memory.
 This means if we put an object into a map or into a variable, 
@@ -20,6 +27,12 @@ even if there are no other references to it.
 It occupies memory and may not be garbage collected.
 WeakMap and WeakContainer are fundamentally different in this aspect. 
 They don't prevent garbage-collection of key objects.
+
+2. Caches that keep the result of expensive processes calculated over immutable data 
+can also benefit from weak-maps.
+I here provide functions similar to the ones of the 
+<a href="https://pub.dev/packages/reselect">reselect</a> package, but better.
+This can be used with Redux or with any other calculations over immutable data.    
 
 <br>
 
@@ -115,6 +128,80 @@ and after that, you can't check if the entry is there or not.
 With expandos, the GC need not be part of the language specification. 
 It's just an optimization that implementations (are expected to) do to release memory that isn't needed anymore. 
 Disabling the GC will not change the behavior of programs unless they run out of memory.
+
+<br>
+
+## Cache
+
+Suppose you have some **immutable** information, which we call "states", and some parameters.
+We want to perform some expensive process (calculation, selection filtering etc) over the states,
+and we want to cache the result. 
+  
+For example, suppose you want to filter an **immutable list of millions of users**, 
+to create a new list with only the names that start with some text. 
+You could filter the users list to remove all other names, like this:
+
+```dart     
+List<User> filter(String text) => users.where((user)=>user.name.startsWith(text)).toList();
+```                                                                                           
+
+This is an expensive process, so you may want to cache the filtered list. 
+
+In this example, we have a single state and a single parameter, 
+so we're going to use the `cache1_1` method:
+
+```dart                                                    
+static List<User> filter(Users users, String text)
+   => _filter(users)(text);
+
+static final _filter = cache1_1(
+        (Users users) 
+           => (String text) 
+              => users.where((user)=>user.name.startsWith(text)).toList());
+```  
+
+The above code will calculate the filtered list only once, 
+and then return it when the `filter` function is called again with the same `users` and `text`.
+
+If the function is called with a **different** `users` and/or `text`, 
+it will recalculate and cache the new result.
+
+However, it treats the states and the parameters differently. 
+If you call the function while keeping the **same state** and changing only the parameter, 
+it will cache all the results, one for each parameter.
+
+However, as soon as you call the function with a **changed state**, 
+it will delete all of its previous cached information,
+since it understands that they are no longer useful.
+And even if you don't call that function ever again, it will delete the cached information if it detects
+that the state is no longer used in other parts of the program.
+In other words, it keeps the cached information in weak-map, 
+so that the cache will not hold to old information and have a negative impact in memory usage.  
+    
+For the moment, these six methods are provided, which combine 1 or 2 states with 0, 1 or 2 parameters:
+
+```dart
+cache1_0((state) => () => ...);
+cache1_1((state) => (parameter) => ...);
+cache1_2((state) => (parameter1, parameter2) => ...);
+cache2_0((state1, state2) => () => ...);
+cache2_1((state1, state2) => (parameter) => ...);
+cache2_2((state1, state2) => (parameter1, parameter2) => ...);
+```    
+
+I have created only those above, because for my own usage I never required more than that. 
+Please, open an <a href="https://github.com/marcglasberg/weak_map/issues">issue</a> 
+to ask for more variations in case you feel the need.
+
+**Note:** These cache functions are similar to the ones found in the
+<a href="https://pub.dev/packages/reselect">reselect</a> package.
+The differences are: First, here you can keep any number of cached results for each function,
+one for each time the function is called with the same states and different parameters.
+Meanwhile, the reselect package only keeps a single cached result per function.
+Second, here it discards the cached information when the state changes or is no longer used.
+Meanwhile, the reselect package will always keep the states and cached results in memory.
+
+<br>
 
 ***
 

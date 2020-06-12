@@ -1,3 +1,7 @@
+## [1.2.0] - 2020/06/11
+
+* Cache functions.
+
 ## [1.1.2] - 2020/05/26
 
 * Add is by identity.
