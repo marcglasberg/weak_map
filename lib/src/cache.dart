@@ -6,6 +6,7 @@ import 'package:weak_map/weak_map.dart';
 typedef R1_0<R> = R Function();
 typedef F1_0<R, S1> = R1_0<R> Function(S1);
 
+/// Cache for 1 immutable state, and no parameters.
 F1_0<R, S1> cache1_0<R, S1>(F1_0<R, S1> f) {
   WeakContainer _s1;
   WeakMap<S1, R> weakMap;
@@ -32,6 +33,7 @@ F1_0<R, S1> cache1_0<R, S1>(F1_0<R, S1> f) {
 typedef R1_1<R, P1> = R Function(P1);
 typedef F1_1<R, S1, P1> = R1_1<R, P1> Function(S1);
 
+/// Cache for 1 immutable state, and 1 parameter.
 F1_1<R, S1, P1> cache1_1<R, S1, P1>(F1_1<R, S1, P1> f) {
   WeakContainer _s1;
   WeakMap<S1, Map<P1, R>> weakMap;
@@ -69,6 +71,7 @@ F1_1<R, S1, P1> cache1_1<R, S1, P1>(F1_1<R, S1, P1> f) {
 typedef R1_2<R, P1, P2> = R Function(P1, P2);
 typedef F1_2<R, S1, P1, P2> = R1_2<R, P1, P2> Function(S1);
 
+/// Cache for 1 immutable state, and 2 parameters.
 F1_2<R, S1, P1, P2> cache1_2<R, S1, P1, P2>(F1_2<R, S1, P1, P2> f) {
   WeakContainer _s1;
   WeakMap<S1, Map<_Pair<P1, P2>, R>> weakMap;
@@ -105,6 +108,7 @@ F1_2<R, S1, P1, P2> cache1_2<R, S1, P1, P2>(F1_2<R, S1, P1, P2> f) {
 typedef R2_0<R> = R Function();
 typedef F2_0<R, S1, S2> = R2_0<R> Function(S1, S2);
 
+/// Cache for 2 immutable states, and no parameters.
 F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
   WeakContainer _s1, _s2;
   WeakMap<S1, WeakMap<S2, R>> weakMap1;
@@ -112,7 +116,10 @@ F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
 
   return (S1 s1, S2 s2) {
     return () {
-      if (_s1 == null || _s2 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
+      if (_s1 == null ||
+          _s2 == null || //
+          !_s1.contains(s1) ||
+          !_s2.contains(s2)) {
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
 
@@ -136,6 +143,7 @@ F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
 typedef R2_1<R, P1> = R Function(P1);
 typedef F2_1<R, S1, S2, P1> = R2_1<R, P1> Function(S1, S2);
 
+/// Cache for 2 immutable states, and 1 parameter.
 F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
   WeakContainer _s1, _s2;
   WeakMap<S1, WeakMap<S2, Map<P1, R>>> weakMap1;
@@ -143,7 +151,10 @@ F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
 
   return (S1 s1, S2 s2) {
     return (P1 p1) {
-      if (_s1 == null || _s2 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
+      if (_s1 == null ||
+          _s2 == null || //
+          !_s1.contains(s1) ||
+          !_s2.contains(s2)) {
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
 
@@ -177,6 +188,7 @@ F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
 typedef R2_2<R, P1, P2> = R Function(P1, P2);
 typedef F2_2<R, S1, S2, P1, P2> = R2_2<R, P1, P2> Function(S1, S2);
 
+/// Cache for 2 immutable states, and 2 parameters.
 F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
   WeakContainer _s1, _s2;
   WeakMap<S1, WeakMap<S2, Map<_Pair<P1, P2>, R>>> weakMap1;
@@ -225,7 +237,11 @@ class _Pair<X, Y> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is _Pair && runtimeType == other.runtimeType && x == other.x && y == other.y;
+      other is _Pair &&
+          runtimeType == other.runtimeType //
+          &&
+          x == other.x &&
+          y == other.y;
 
   @override
   int get hashCode => x.hashCode ^ y.hashCode;

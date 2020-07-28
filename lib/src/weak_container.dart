@@ -32,7 +32,9 @@ class WeakContainer {
       if (_value == value) {
         return true;
       } else {
-        return (_expando != null && _allowedInExpando(value) && _expando[value] == true);
+        return (_expando != null && //
+            _allowedInExpando(value) &&
+            _expando[value] == true);
       }
     }
   }
