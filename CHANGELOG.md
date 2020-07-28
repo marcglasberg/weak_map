@@ -1,3 +1,7 @@
+## [1.2.2] - 2020/07/28
+
+* Dependency bump.
+
 ## [1.2.1] - 2020/06/12
 
 * Cache functions.
