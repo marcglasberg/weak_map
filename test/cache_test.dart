@@ -335,4 +335,56 @@ void main() {
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Test 3 states with 0 parameters.', () {
+    //
+    var selector = cache3_0((
+      List<String> names,
+      int limit,
+      String startsWith,
+    ) =>
+        () {
+          return names.where((str) => str.startsWith(startsWith)).take(limit).toList();
+        });
+
+    // Same states return the same object as the result.
+    var memoA1 = selector(stateNames, 1, "A")();
+    var memoA2 = selector(stateNames, 1, "A")();
+    expect(memoA1, ["Anna"]);
+    expect(memoA2, ["Anna"]);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    // ---
+
+    // Change first state (even if it's equal), deletes the cache.
+    var memoA = selector(stateNames, 1, "A")();
+    var memoB = selector(stateNames.toList(), 1, "A")();
+    expect(memoB, ["Anna"]);
+    expect(identical(memoA, memoB), isFalse);
+
+    // ---
+
+    // Change first state, deletes the cache.
+    memoA = selector(stateNames, 1, "A")();
+    selector(stateNames.toList(), 1, "A")();
+    memoB = selector(stateNames, 1, "A")();
+    expect(memoB, ["Anna"]);
+    expect(identical(memoA, memoB), isFalse);
+
+    // Change second state, deletes the cache.
+    memoA = selector(stateNames, 1, "A")();
+    selector(stateNames, 2, "A")();
+    memoB = selector(stateNames, 1, "A")();
+    expect(memoB, ["Anna"]);
+    expect(identical(memoA, memoB), isFalse);
+
+    // Change third state, deletes the cache.
+    memoA = selector(stateNames, 1, "A")();
+    selector(stateNames, 1, "B")();
+    memoB = selector(stateNames, 1, "A")();
+    expect(memoB, ["Anna"]);
+    expect(identical(memoA, memoB), isFalse);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 }

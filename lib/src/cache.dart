@@ -228,6 +228,47 @@ F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////
 
+typedef R3_0<R> = R Function();
+typedef F3_0<R, S1, S2, S3> = R3_0<R> Function(S1, S2, S3);
+
+/// Cache for 3 immutable states, and no parameters.
+F3_0<R, S1, S2, S3> cache3_0<R, S1, S2, S3>(F3_0<R, S1, S2, S3> f) {
+  WeakContainer _s1, _s2, _s3;
+  WeakMap<S1, WeakMap<S2, WeakMap<S3, R>>> weakMap1;
+  WeakMap<S2, WeakMap<S3, R>> weakMap2;
+  WeakMap<S3, R> weakMap3;
+
+  return (S1 s1, S2 s2, S3 s3) {
+    return () {
+      if (_s1 == null ||
+          _s2 == null ||
+          _s3 == null || //
+          !_s1.contains(s1) ||
+          !_s2.contains(s2) ||
+          !_s3.contains(s3)) {
+        _s1 = WeakContainer(s1);
+        _s2 = WeakContainer(s2);
+        _s3 = WeakContainer(s3);
+
+        var result = f(s1, s2, s3)();
+        weakMap1 = WeakMap();
+        weakMap2 = WeakMap();
+        weakMap3 = WeakMap();
+        weakMap3[s3] = result;
+        weakMap2[s2] = weakMap3;
+        weakMap1[s1] = weakMap2;
+        return result;
+      }
+      //
+      else {
+        return weakMap1[s1][s2][s3];
+      }
+    };
+  };
+}
+
+// /////////////////////////////////////////////////////////////////////////////////////////////////
+
 class _Pair<X, Y> {
   final X x;
   final Y y;
