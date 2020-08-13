@@ -1,17 +1,17 @@
 import 'dart:collection';
 import 'package:weak_map/weak_map.dart';
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R1_0<R> = R Function();
-typedef F1_0<R, S1> = R1_0<R> Function(S1);
+typedef R1_0<Result> = Result Function();
+typedef F1_0<Result, State1> = R1_0<Result> Function(State1);
 
 /// Cache for 1 immutable state, and no parameters.
-F1_0<R, S1> cache1_0<R, S1>(F1_0<R, S1> f) {
+F1_0<Result, State1> cache1_0<Result, State1>(F1_0<Result, State1> f) {
   WeakContainer _s1;
-  WeakMap<S1, R> weakMap;
+  WeakMap<State1, Result> weakMap;
 
-  return (S1 s1) {
+  return (State1 s1) {
     return () {
       if (_s1 == null || !_s1.contains(s1)) {
         weakMap = WeakMap();
@@ -28,21 +28,23 @@ F1_0<R, S1> cache1_0<R, S1>(F1_0<R, S1> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R1_1<R, P1> = R Function(P1);
-typedef F1_1<R, S1, P1> = R1_1<R, P1> Function(S1);
+typedef R1_1<Result, Param1> = Result Function(Param1);
+typedef F1_1<Result, State1, Param1> = R1_1<Result, Param1> Function(State1);
 
 /// Cache for 1 immutable state, and 1 parameter.
-F1_1<R, S1, P1> cache1_1<R, S1, P1>(F1_1<R, S1, P1> f) {
+F1_1<Result, State1, Param1> cache1_1<Result, State1, Param1>(
+  F1_1<Result, State1, Param1> f,
+) {
   WeakContainer _s1;
-  WeakMap<S1, Map<P1, R>> weakMap;
+  WeakMap<State1, Map<Param1, Result>> weakMap;
 
-  return (S1 s1) {
-    return (P1 p1) {
+  return (State1 s1) {
+    return (Param1 p1) {
       if (_s1 == null || !_s1.contains(s1)) {
         weakMap = WeakMap();
-        Map<P1, R> map = HashMap();
+        Map<Param1, Result> map = HashMap();
         weakMap[s1] = map;
         _s1 = WeakContainer(s1);
         var result = f(s1)(p1);
@@ -51,7 +53,7 @@ F1_1<R, S1, P1> cache1_1<R, S1, P1>(F1_1<R, S1, P1> f) {
       }
       //
       else {
-        Map<P1, R> map = weakMap[s1];
+        Map<Param1, Result> map = weakMap[s1];
         assert(map != null);
         if (!map.containsKey(p1)) {
           var result = f(s1)(p1);
@@ -66,22 +68,26 @@ F1_1<R, S1, P1> cache1_1<R, S1, P1>(F1_1<R, S1, P1> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R1_2<R, P1, P2> = R Function(P1, P2);
-typedef F1_2<R, S1, P1, P2> = R1_2<R, P1, P2> Function(S1);
+typedef R1_2<Result, Param1, Param2> = //
+    Result Function(Param1, Param2);
+
+typedef F1_2<Result, State1, Param1, Param2> = //
+    R1_2<Result, Param1, Param2> Function(State1);
 
 /// Cache for 1 immutable state, and 2 parameters.
-F1_2<R, S1, P1, P2> cache1_2<R, S1, P1, P2>(F1_2<R, S1, P1, P2> f) {
+F1_2<Result, State1, Param1, Param2> cache1_2<Result, State1, Param1, Param2>(
+    F1_2<Result, State1, Param1, Param2> f) {
   WeakContainer _s1;
-  WeakMap<S1, Map<_Pair<P1, P2>, R>> weakMap;
+  WeakMap<State1, Map<_Pair<Param1, Param2>, Result>> weakMap;
 
-  return (S1 s1) {
-    return (P1 p1, P2 p2) {
+  return (State1 s1) {
+    return (Param1 p1, Param2 p2) {
       var parP = _Pair(p1, p2);
       if (_s1 == null || !_s1.contains(s1)) {
         weakMap = WeakMap();
-        Map<_Pair<P1, P2>, R> map = HashMap();
+        Map<_Pair<Param1, Param2>, Result> map = HashMap();
         weakMap[s1] = map;
         _s1 = WeakContainer(s1);
         var result = f(s1)(p1, p2);
@@ -90,7 +96,7 @@ F1_2<R, S1, P1, P2> cache1_2<R, S1, P1, P2>(F1_2<R, S1, P1, P2> f) {
       }
       //
       else {
-        Map<_Pair<P1, P2>, R> map = weakMap[s1];
+        Map<_Pair<Param1, Param2>, Result> map = weakMap[s1];
         assert(map != null);
         if (!map.containsKey(parP)) {
           var result = f(s1)(p1, p2);
@@ -103,18 +109,20 @@ F1_2<R, S1, P1, P2> cache1_2<R, S1, P1, P2>(F1_2<R, S1, P1, P2> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R2_0<R> = R Function();
-typedef F2_0<R, S1, S2> = R2_0<R> Function(S1, S2);
+typedef R2_0<Result> = Result Function();
+typedef F2_0<Result, State1, State2> = R2_0<Result> Function(State1, State2);
 
 /// Cache for 2 immutable states, and no parameters.
-F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
+F2_0<Result, State1, State2> cache2_0<Result, State1, State2>(
+  F2_0<Result, State1, State2> f,
+) {
   WeakContainer _s1, _s2;
-  WeakMap<S1, WeakMap<S2, R>> weakMap1;
-  WeakMap<S2, R> weakMap2;
+  WeakMap<State1, WeakMap<State2, Result>> weakMap1;
+  WeakMap<State2, Result> weakMap2;
 
-  return (S1 s1, S2 s2) {
+  return (State1 s1, State2 s2) {
     return () {
       if (_s1 == null ||
           _s2 == null || //
@@ -138,19 +146,23 @@ F2_0<R, S1, S2> cache2_0<R, S1, S2>(F2_0<R, S1, S2> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R2_1<R, P1> = R Function(P1);
-typedef F2_1<R, S1, S2, P1> = R2_1<R, P1> Function(S1, S2);
+typedef R2_1<Result, Param1> = Result Function(Param1);
+typedef F2_1<Result, State1, State2, Param1> = R2_1<Result, Param1> Function(
+  State1,
+  State2,
+);
 
 /// Cache for 2 immutable states, and 1 parameter.
-F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
+F2_1<Result, State1, State2, Param1> cache2_1<Result, State1, State2, Param1>(
+    F2_1<Result, State1, State2, Param1> f) {
   WeakContainer _s1, _s2;
-  WeakMap<S1, WeakMap<S2, Map<P1, R>>> weakMap1;
-  WeakMap<S2, Map<P1, R>> weakMap2;
+  WeakMap<State1, WeakMap<State2, Map<Param1, Result>>> weakMap1;
+  WeakMap<State2, Map<Param1, Result>> weakMap2;
 
-  return (S1 s1, S2 s2) {
-    return (P1 p1) {
+  return (State1 s1, State2 s2) {
+    return (Param1 p1) {
       if (_s1 == null ||
           _s2 == null || //
           !_s1.contains(s1) ||
@@ -161,7 +173,7 @@ F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
         var result = f(s1, s2)(p1);
         weakMap1 = WeakMap();
         weakMap2 = WeakMap();
-        Map<P1, R> map = HashMap();
+        Map<Param1, Result> map = HashMap();
         map[p1] = result;
         weakMap2[s2] = map;
         weakMap1[s1] = weakMap2;
@@ -169,7 +181,7 @@ F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
       }
       //
       else {
-        Map<P1, R> map = weakMap1[s1][s2];
+        Map<Param1, Result> map = weakMap1[s1][s2];
         assert(map != null);
         if (!map.containsKey(p1)) {
           var result = f(s1, s2)(p1);
@@ -183,19 +195,24 @@ F2_1<R, S1, S2, P1> cache2_1<R, S1, S2, P1>(F2_1<R, S1, S2, P1> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R2_2<R, P1, P2> = R Function(P1, P2);
-typedef F2_2<R, S1, S2, P1, P2> = R2_2<R, P1, P2> Function(S1, S2);
+typedef R2_2<Result, Param1, Param2> = //
+    Result Function(Param1, Param2);
+
+typedef F2_2<Result, State1, State2, Param1, Param2> = //
+    R2_2<Result, Param1, Param2> Function(State1, State2);
 
 /// Cache for 2 immutable states, and 2 parameters.
-F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
+F2_2<Result, State1, State2, Param1, Param2> //
+    cache2_2<Result, State1, State2, Param1, Param2>(
+        F2_2<Result, State1, State2, Param1, Param2> f) {
   WeakContainer _s1, _s2;
-  WeakMap<S1, WeakMap<S2, Map<_Pair<P1, P2>, R>>> weakMap1;
-  WeakMap<S2, Map<_Pair<P1, P2>, R>> weakMap2;
+  WeakMap<State1, WeakMap<State2, Map<_Pair<Param1, Param2>, Result>>> weakMap1;
+  WeakMap<State2, Map<_Pair<Param1, Param2>, Result>> weakMap2;
 
-  return (S1 s1, S2 s2) {
-    return (P1 p1, P2 p2) {
+  return (State1 s1, State2 s2) {
+    return (Param1 p1, Param2 p2) {
       var par = _Pair(p1, p2);
       if (_s1 == null || !_s1.contains(s1) || !_s2.contains(s2)) {
         _s1 = WeakContainer(s1);
@@ -204,7 +221,7 @@ F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
         var result = f(s1, s2)(p1, p2);
         weakMap1 = WeakMap();
         weakMap2 = WeakMap();
-        Map<_Pair<P1, P2>, R> map = HashMap();
+        Map<_Pair<Param1, Param2>, Result> map = HashMap();
         map[par] = result;
         weakMap2[s2] = map;
         weakMap1[s1] = weakMap2;
@@ -212,7 +229,7 @@ F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
       }
       //
       else {
-        Map<_Pair<P1, P2>, R> map = weakMap1[s1][s2];
+        Map<_Pair<Param1, Param2>, Result> map = weakMap1[s1][s2];
         assert(map != null);
         if (!map.containsKey(par)) {
           var result = f(s1, s2)(p1, p2);
@@ -226,19 +243,23 @@ F2_2<R, S1, S2, P1, P2> cache2_2<R, S1, S2, P1, P2>(F2_2<R, S1, S2, P1, P2> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
-typedef R3_0<R> = R Function();
-typedef F3_0<R, S1, S2, S3> = R3_0<R> Function(S1, S2, S3);
+typedef R3_0<Result> = //
+    Result Function();
+
+typedef F3_0<Result, State1, State2, State3> = //
+    R3_0<Result> Function(State1, State2, State3);
 
 /// Cache for 3 immutable states, and no parameters.
-F3_0<R, S1, S2, S3> cache3_0<R, S1, S2, S3>(F3_0<R, S1, S2, S3> f) {
+F3_0<Result, State1, State2, State3> cache3_0<Result, State1, State2, State3>(
+    F3_0<Result, State1, State2, State3> f) {
   WeakContainer _s1, _s2, _s3;
-  WeakMap<S1, WeakMap<S2, WeakMap<S3, R>>> weakMap1;
-  WeakMap<S2, WeakMap<S3, R>> weakMap2;
-  WeakMap<S3, R> weakMap3;
+  WeakMap<State1, WeakMap<State2, WeakMap<State3, Result>>> weakMap1;
+  WeakMap<State2, WeakMap<State3, Result>> weakMap2;
+  WeakMap<State3, Result> weakMap3;
 
-  return (S1 s1, S2 s2, S3 s3) {
+  return (State1 s1, State2 s2, State3 s3) {
     return () {
       if (_s1 == null ||
           _s2 == null ||
@@ -267,7 +288,7 @@ F3_0<R, S1, S2, S3> cache3_0<R, S1, S2, S3>(F3_0<R, S1, S2, S3> f) {
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
 class _Pair<X, Y> {
   final X x;
@@ -288,4 +309,4 @@ class _Pair<X, Y> {
   int get hashCode => x.hashCode ^ y.hashCode;
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////

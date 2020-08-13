@@ -1,3 +1,7 @@
+## [1.3.2] - 2020/08/13
+
+* Type parameters rename (clean-code).
+
 ## [1.3.1] - 2020/08/11
 
 * cache3_0.
