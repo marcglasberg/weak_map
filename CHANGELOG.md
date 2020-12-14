@@ -1,3 +1,7 @@
+## [1.4.0-nullsafety.0]
+
+* Migrating to null safety
+
 ## [1.3.2] - 2020/08/13
 
 * Type parameters rename (clean-code).
