@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 /// A WeakMap lets you garbage-collect its keys.
 /// Please note: The **[key]** can be garbage-collected, not the [value].
 ///
