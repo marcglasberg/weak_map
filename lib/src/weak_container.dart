@@ -16,16 +16,16 @@
 /// the weak-container will NOT prevent `obj` to be garbage-collected.
 ///
 class WeakContainer {
-  Expando _expando;
-  Object _value;
+  Expando? _expando;
+  Object? _value;
   bool _isNull;
 
-  WeakContainer(Object value)
-      : _expando = _allowedInExpando(value) ? _createExpando(value) : null,
+  WeakContainer(Object? value)
+      : _expando = _allowedInExpando(value) ? _createExpando(value!) : null,
         _value = _allowedInExpando(value) ? null : value,
         _isNull = (value == null);
 
-  bool contains(Object value) {
+  bool contains(Object? value) {
     if (value == null) {
       return _isNull;
     } else {
@@ -34,7 +34,7 @@ class WeakContainer {
       } else {
         return (_expando != null && //
             _allowedInExpando(value) &&
-            _expando[value] == true);
+            _expando![value] == true);
       }
     }
   }
@@ -52,6 +52,6 @@ class WeakContainer {
     return expando;
   }
 
-  static bool _allowedInExpando(Object value) =>
+  static bool _allowedInExpando(Object? value) =>
       value is! String && value is! num && value is! bool && value != null;
 }
