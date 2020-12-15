@@ -98,6 +98,8 @@ void main() {
               .toList();
         });
 
+    // TODO: MARCELO: Refazer este teste.
+    // Originalmente era: expect(identical("a", otherA), isFalse);
     // With no other changes except
     // flutter channel stable 1.22.5 => flutter channel beta  1.24.0-10.2.pre
     // (Dart version 2.10.4)         => (Dart version 2.12.0 (build 2.12.0-29.10.beta))
