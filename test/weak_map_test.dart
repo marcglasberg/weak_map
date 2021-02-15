@@ -11,24 +11,28 @@ void main() {
     var obj2 = Object();
     var obj3 = Object();
     var obj4 = Object();
+    var obj5 = Object();
     expect(obj1, isNot(obj2));
     expect(obj2, isNot(obj3));
     expect(obj3, isNot(obj4));
+    expect(obj4, isNot(obj5));
 
     map[1] = obj1;
     map["A"] = obj2;
     map[true] = obj3;
     map[false] = obj4;
+    map[null] = obj5;
 
     expect(map[1], obj1);
     expect(map["A"], obj2);
     expect(map[true], obj3);
     expect(map[false], obj4);
+    expect(map[null], obj5);
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  test("Using null in the map.", () {
+  test("Using null as the map value.", () {
     var map = WeakMap();
 
     map["A"] = null;
@@ -47,7 +51,7 @@ void main() {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  test("Using null in the map.", () {
+  test("Using null as the map key.", () {
     var map = WeakMap();
 
     var obj1 = Object();

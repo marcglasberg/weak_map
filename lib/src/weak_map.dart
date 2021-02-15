@@ -31,15 +31,12 @@
 ///
 /// Notes:
 ///
-/// 1. If you add a number, a boolean, a String, or a const type to the map,
-/// it will act like a regular map, because these types are never
+/// 1. If you use null, a number, a boolean, a String, or a const type as the
+/// map key, it will act like a regular map, because these types are never
 /// garbage-collected. All other types of object may be garbage-collected.
 ///
 /// 2. To retrieve a value added to the map, you can use the equivalent
-/// syntaxes `var y = map[x]` or `var y = map.get(x)`.
-///
-/// 3. Doing `map[x] = y` is equivalent to `map.add(key: obj, value: 42)`,
-/// but the object will always be retrieved by **identity**.
+/// syntax `var y = map[x]` or `var y = map.get(x)`.
 ///
 class WeakMap<K, V> {
   final Map<K, V> _map;

@@ -7,12 +7,16 @@ This package contains the classes:
  * **WeakContainer**
  
 And also the functions:
- * **cache1_0**
- * **cache1_1**
- * **cache1_2**
- * **cache2_0**
- * **cache2_1**
- * **cache2_2**
+ * **cache1state**
+ * **cache1state_1param**
+ * **cache1state_2params**
+ * **cache2states**
+ * **cache2states_1param**
+ * **cache2states_2params**
+ * **cache3states**
+ * **cache1state_0params_x**
+ * **cache2states_0params_x**
+ * **cache3states_0params_x**
 
 ### Why is this package useful?
 
@@ -76,7 +80,7 @@ map["John"] = null; // Same as map.remove("John")
 
 **Notes:**
 
-1. If you add a number, a boolean, a String, or a const type to the map,
+1. If you use null, a number, a boolean, a String, or a const type as the map key,
 it will act like a regular map, because these types are never
 garbage-collected. All other types of object may be garbage-collected.
 
@@ -173,21 +177,30 @@ it will cache all the results, one for each parameter.
 However, as soon as you call the function with a **changed state**, 
 it will delete all of its previous cached information,
 since it understands that they are no longer useful.
+
 And even if you don't call that function ever again, it will delete the cached information if it detects
 that the state is no longer used in other parts of the program.
 In other words, it keeps the cached information in a weak-map, 
-so that the cache will not hold to old information and have a negative impact in memory usage.  
+so that the cache will not hold to old information and have a negative impact in memory usage.
+
+Some functions, marked with an "x", also let you pass some extra information which 
+is not used in any way to decide whether the cache should be used/recalculated/evicted.
     
-For the moment, the following six methods are provided, 
-which combine 1 or 2 states with 0, 1 or 2 parameters:
+For the moment, the following 10 methods are provided, 
+which combine 1, 2 or 3 states with 0, 1 or 2 parameters, 
+and possibly some extra information:
 
 ```dart
-cache1_0((state) => () => ...);
-cache1_1((state) => (parameter) => ...);
-cache1_2((state) => (parameter1, parameter2) => ...);
-cache2_0((state1, state2) => () => ...);
-cache2_1((state1, state2) => (parameter) => ...);
-cache2_2((state1, state2) => (parameter1, parameter2) => ...);
+cache1state((state) => () => ...);
+cache1state_1param((state) => (parameter) => ...);
+cache1state_2params((state) => (parameter1, parameter2) => ...);
+cache2states((state1, state2) => () => ...);
+cache2states_1param((state1, state2) => (parameter) => ...);
+cache2states_2params((state1, state2) => (parameter1, parameter2) => ...);
+cache3states((state1, state2, state3) => () => ...);
+cache1state_0params_x((state1, extra) => () => ...);
+cache2states_0params_x((state1, state2, extra) => () => ...);
+cache3states_0params_x((state1, state2, state3, extra) => () => ...);
 ```    
 
 I have created only those above, because for my own usage I never required more than that. 

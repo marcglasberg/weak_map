@@ -8,27 +8,35 @@ void main() {
 
   test('Test 1 state with 0 parameters.', () {
     //
-    var selector = cache1_0((int limit) => () {
-          return stateNames.take(limit).toList();
+    var selector = cache1state((int? limit) => () {
+          return limit == null ? [] : stateNames.take(limit).toList();
         });
 
     var memoA1 = selector(1)();
     var memoA2 = selector(1)();
     expect(memoA1, ["Juan"]);
+    expect(memoA2, ["Juan"]);
     expect(identical(memoA1, memoA2), isTrue);
 
     var memoB1 = selector(2)();
     var memoB2 = selector(2)();
     expect(memoB1, ["Juan", "Anna"]);
+    expect(memoB2, ["Juan", "Anna"]);
     expect(identical(memoB1, memoB2), isTrue);
+
+    var memoC1 = selector(null)();
+    var memoC2 = selector(null)();
+    expect(memoC1, []);
+    expect(memoC2, []);
+    expect(identical(memoC1, memoC2), isTrue);
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test results are forgotten when the state changes (1 state with 0 parameters).', () {
     //
-    var selector = cache1_0((int limit) => () {
-          return stateNames.take(limit).toList();
+    var selector = cache1state((int? limit) => () {
+          return limit == null ? [] : stateNames.take(limit).toList();
         });
 
     var memoA1 = selector(1)();
@@ -45,11 +53,55 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Also works when changing to null (1 state with 0 parameters).', () {
+    //
+    var selector = cache1state((int? limit) => () {
+          return limit == null ? [] : stateNames.take(limit).toList();
+        });
+
+    var memoA1 = selector(1)();
+    var memoA2 = selector(1)();
+    expect(memoA1, ["Juan"]);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    // Another state with another parameter.
+    selector(null)();
+
+    // Try reading the previous state, with the same parameter as before.
+    var memoA5 = selector(1)();
+    expect(memoA5, ["Juan"]);
+    expect(identical(memoA5, memoA1), isFalse);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Also works when changing from null (1 state with 0 parameters).', () {
+    //
+    var selector = cache1state((int? limit) => () {
+          return limit == null ? [] : stateNames.take(limit).toList();
+        });
+
+    var memoA1 = selector(null)();
+    var memoA2 = selector(null)();
+    expect(memoA1, []);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    // Another state with another parameter.
+    selector(1)();
+
+    // Try reading the previous state, with the same parameter as before.
+    var memoA5 = selector(null)();
+    expect(memoA5, []);
+    expect(identical(memoA5, memoA1), isFalse);
+  });
+
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 1 state with 1 parameter.', () {
     //
-    var selector = cache1_1((List<String> state) => (String startString) {
+    var selector = cache1state_1param((List<String> state) => (String startString) {
           return state.where((str) => str.startsWith(startString)).toList();
         });
 
@@ -69,7 +121,7 @@ void main() {
 
   test('Test results are forgotten when the state changes (1 state with 1 parameter).', () {
     //
-    var selector = cache1_1((List<String> state) => (String startString) {
+    var selector = cache1state_1param((List<String> state) => (String startString) {
           return state.where((str) => str.startsWith(startString)).toList();
         });
 
@@ -92,11 +144,12 @@ void main() {
 
   test('Test 1 state with 2 parameters.', () {
     //
-    var selector = cache1_2((List<String> state) => (String startString, String endString) {
-          return state
-              .where((str) => str.startsWith(startString) && str.endsWith(endString))
-              .toList();
-        });
+    var selector =
+        cache1state_2params((List<String> state) => (String startString, String endString) {
+              return state
+                  .where((str) => str.startsWith(startString) && str.endsWith(endString))
+                  .toList();
+            });
 
     // TODO: MARCELO: Refazer este teste.
     // Originalmente era: expect(identical("a", otherA), isFalse);
@@ -126,11 +179,12 @@ void main() {
 
   test('Test results are forgotten when the state changes (1 state with 2 parameters).', () {
     //
-    var selector = cache1_2((List<String> state) => (String startString, String endString) {
-          return state
-              .where((str) => str.startsWith(startString) && str.endsWith(endString))
-              .toList();
-        });
+    var selector =
+        cache1state_2params((List<String> state) => (String startString, String endString) {
+              return state
+                  .where((str) => str.startsWith(startString) && str.endsWith(endString))
+                  .toList();
+            });
 
     var memoA1 = selector(stateNames)("A", "a");
     var memoA2 = selector(stateNames)("A", "a");
@@ -151,7 +205,7 @@ void main() {
 
   test('Test 2 states with 0 parameters.', () {
     //
-    var selector = cache2_0((List<String> names, int limit) => () {
+    var selector = cache2states((List<String> names, int limit) => () {
           return names.where((str) => str.startsWith("A")).take(limit).toList();
         });
 
@@ -171,7 +225,7 @@ void main() {
 
   test('Test results are forgotten when the state changes (2 states with 0 parameters).', () {
     //
-    var selector = cache2_0((List<String> names, int limit) => () {
+    var selector = cache2states((List<String> names, int limit) => () {
           return names.where((str) => str.startsWith("A")).take(limit).toList();
         });
 
@@ -193,7 +247,7 @@ void main() {
 
   test('Test 2 states with 1 parameter.', () {
     //
-    var selector = cache2_1((List<String> names, int limit) => (String searchString) {
+    var selector = cache2states_1param((List<String> names, int limit) => (String searchString) {
           return names.where((str) => str.startsWith(searchString)).take(limit).toList();
         });
 
@@ -222,7 +276,7 @@ void main() {
 
   test('Test results are forgotten when the state changes (2 states with 1 parameter).', () {
     //
-    var selector = cache2_1((List<String> names, int limit) => (String searchString) {
+    var selector = cache2states_1param((List<String> names, int limit) => (String searchString) {
           return names.where((str) => str.startsWith(searchString)).take(limit).toList();
         });
 
@@ -245,8 +299,8 @@ void main() {
 
   test('Test 2 states with 2 parameters.', () {
     //
-    var selector =
-        cache2_2((List<String> names, int limit) => (String startString, String endString) {
+    var selector = cache2states_2params(
+        (List<String> names, int limit) => (String startString, String endString) {
               return names
                   .where((str) => str.startsWith(startString) && str.endsWith(endString))
                   .take(limit)
@@ -268,8 +322,8 @@ void main() {
 
   test('Test results are forgotten when the state changes (2 states with 2 parameters).', () {
     //
-    var selector =
-        cache2_2((List<String> names, int limit) => (String startString, String endString) {
+    var selector = cache2states_2params(
+        (List<String> names, int limit) => (String startString, String endString) {
               return names
                   .where((str) => str.startsWith(startString) && str.endsWith(endString))
                   .take(limit)
@@ -297,8 +351,8 @@ void main() {
     //
     var stateNames1 = List<String>.unmodifiable(["A1a", "A2a", "A3x", "B4a", "B5a", "B6x"]);
 
-    var selector =
-        cache2_2((List<String> names, int limit) => (String startString, String endString) {
+    var selector = cache2states_2params(
+        (List<String> names, int limit) => (String startString, String endString) {
               return names
                   .where((str) => str.startsWith(startString) && str.endsWith(endString))
                   .take(limit)
@@ -344,7 +398,7 @@ void main() {
 
   test('Test 3 states with 0 parameters.', () {
     //
-    var selector = cache3_0((
+    var selector = cache3states((
       List<String> names,
       int limit,
       String startsWith,

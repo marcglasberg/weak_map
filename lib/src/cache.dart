@@ -7,7 +7,7 @@ typedef R1_0<Result> = Result Function();
 typedef F1_0<Result, State1> = R1_0<Result> Function(State1);
 
 /// Cache for 1 immutable state, and no parameters.
-F1_0<Result?, State1> cache1_0<Result, State1>(F1_0<Result, State1> f) {
+F1_0<Result?, State1> cache1state<Result, State1>(F1_0<Result, State1> f) {
   WeakContainer? _s1;
   late WeakMap<State1, Result> weakMap;
 
@@ -34,7 +34,7 @@ typedef R1_1<Result, Param1> = Result Function(Param1);
 typedef F1_1<Result, State1, Param1> = R1_1<Result, Param1> Function(State1);
 
 /// Cache for 1 immutable state, and 1 parameter.
-F1_1<Result?, State1, Param1> cache1_1<Result, State1, Param1>(
+F1_1<Result?, State1, Param1> cache1state_1param<Result, State1, Param1>(
   F1_1<Result, State1, Param1> f,
 ) {
   WeakContainer? _s1;
@@ -76,7 +76,7 @@ typedef F1_2<Result, State1, Param1, Param2> = //
     R1_2<Result, Param1, Param2> Function(State1);
 
 /// Cache for 1 immutable state, and 2 parameters.
-F1_2<Result?, State1, Param1, Param2> cache1_2<Result, State1, Param1, Param2>(
+F1_2<Result?, State1, Param1, Param2> cache1state_2params<Result, State1, Param1, Param2>(
     F1_2<Result, State1, Param1, Param2> f) {
   WeakContainer? _s1;
   late WeakMap<State1, Map<_Pair<Param1, Param2>, Result>> weakMap;
@@ -113,7 +113,7 @@ typedef R2_0<Result> = Result Function();
 typedef F2_0<Result, State1, State2> = R2_0<Result> Function(State1, State2);
 
 /// Cache for 2 immutable states, and no parameters.
-F2_0<Result?, State1, State2> cache2_0<Result, State1, State2>(
+F2_0<Result?, State1, State2> cache2states<Result, State1, State2>(
   F2_0<Result, State1, State2> f,
 ) {
   WeakContainer? _s1, _s2;
@@ -153,7 +153,7 @@ typedef F2_1<Result, State1, State2, Param1> = R2_1<Result, Param1> Function(
 );
 
 /// Cache for 2 immutable states, and 1 parameter.
-F2_1<Result?, State1, State2, Param1> cache2_1<Result, State1, State2, Param1>(
+F2_1<Result?, State1, State2, Param1> cache2states_1param<Result, State1, State2, Param1>(
     F2_1<Result, State1, State2, Param1> f) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Map<Param1, Result>>> weakMap1;
@@ -202,7 +202,7 @@ typedef F2_2<Result, State1, State2, Param1, Param2> = //
 
 /// Cache for 2 immutable states, and 2 parameters.
 F2_2<Result?, State1, State2, Param1, Param2> //
-    cache2_2<Result, State1, State2, Param1, Param2>(
+    cache2states_2params<Result, State1, State2, Param1, Param2>(
         F2_2<Result, State1, State2, Param1, Param2> f) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Map<_Pair<Param1, Param2>, Result>>> weakMap1;
@@ -248,7 +248,7 @@ typedef F3_0<Result, State1, State2, State3> = //
     R3_0<Result> Function(State1, State2, State3);
 
 /// Cache for 3 immutable states, and no parameters.
-F3_0<Result?, State1, State2, State3> cache3_0<Result, State1, State2, State3>(
+F3_0<Result?, State1, State2, State3> cache3states<Result, State1, State2, State3>(
     F3_0<Result, State1, State2, State3> f) {
   WeakContainer? _s1, _s2, _s3;
   late WeakMap<State1, WeakMap<State2, WeakMap<State3, Result>>> weakMap1;
@@ -291,15 +291,15 @@ typedef F1_0_x<Result, State1, Extra> = R1_0<Result> Function(State1, Extra);
 /// Cache for 1 immutable state, no parameters, and some extra information.
 /// Note: The extra information is not used in any way to decide whether
 /// the cache should be used/recalculated/evicted.
-F1_0_x<Result, State1, Extra> cache1state_0params_x<Result, State1, Extra>(
+F1_0_x<Result?, State1, Extra> cache1state_0params_x<Result, State1, Extra>(
   F1_0_x<Result, State1, Extra> f,
 ) {
-  WeakContainer _s1;
-  WeakMap<State1, Result> weakMap;
+  WeakContainer? _s1;
+  late WeakMap<State1, Result> weakMap;
 
   return (State1 state1, Extra extra) {
     return () {
-      if (_s1 == null || !_s1.contains(state1)) {
+      if (_s1 == null || !_s1!.contains(state1)) {
         weakMap = WeakMap();
         _s1 = WeakContainer(state1);
         var result = f(state1, extra)();
@@ -316,24 +316,24 @@ F1_0_x<Result, State1, Extra> cache1state_0params_x<Result, State1, Extra>(
 
 // /////////////////////////////////////////////////////////////////////////////
 
-typedef F2_0_x<R, S1, S2, Extra> = R2_0<R> Function(S1, S2, Extra);
+typedef F2_0_x<Result, State1, State2, Extra> = R2_0<Result> Function(State1, State2, Extra);
 
 /// Cache for 2 immutable states, no parameters, and some extra information.
 /// Note: The extra information is not used in any way to decide whether
 /// the cache should be used/recalculated/evicted.
-F2_0_x<R, S1, S2, Extra> cache2states_0params_x<R, S1, S2, Extra>(
-  F2_0_x<R, S1, S2, Extra> f,
+F2_0_x<Result?, State1, State2, Extra> cache2states_0params_x<Result, State1, State2, Extra>(
+  F2_0_x<Result, State1, State2, Extra> f,
 ) {
-  WeakContainer _s1, _s2;
-  WeakMap<S1, WeakMap<S2, R>> weakMap1;
-  WeakMap<S2, R> weakMap2;
+  WeakContainer? _s1, _s2;
+  late WeakMap<State1, WeakMap<State2, Result>> weakMap1;
+  late WeakMap<State2, Result> weakMap2;
 
-  return (S1 state1, S2 state2, Extra extra) {
+  return (State1 state1, State2 state2, Extra extra) {
     return () {
       if (_s1 == null ||
           _s2 == null || //
-          !_s1.contains(state1) ||
-          !_s2.contains(state2)) {
+          !_s1!.contains(state1) ||
+          !_s2!.contains(state2)) {
         _s1 = WeakContainer(state1);
         _s2 = WeakContainer(state2);
 
@@ -346,7 +346,7 @@ F2_0_x<R, S1, S2, Extra> cache2states_0params_x<R, S1, S2, Extra>(
       }
       //
       else {
-        return weakMap1[state1][state2];
+        return weakMap1[state1]![state2];
       }
     };
   };
@@ -354,27 +354,27 @@ F2_0_x<R, S1, S2, Extra> cache2states_0params_x<R, S1, S2, Extra>(
 
 // /////////////////////////////////////////////////////////////////////////////
 
-typedef F3_0_x<R, S1, S2, S3, Extra> = R3_0<R> Function(S1, S2, S3, Extra);
+typedef F3_0_x<Result, State1, State2, State3, Extra> = R3_0<Result> Function(State1, State2, State3, Extra);
 
 /// Cache for 3 immutable states, no parameters, and some extra information.
 /// Note: The extra information is not used in any way to decide whether
 /// the cache should be used/recalculated/evicted.
-F3_0_x<R, S1, S2, S3, Extra> cache3states_0params_x<R, S1, S2, S3, Extra>(
-  F3_0_x<R, S1, S2, S3, Extra> f,
+F3_0_x<Result?, State1, State2, State3, Extra> cache3states_0params_x<Result, State1, State2, State3, Extra>(
+  F3_0_x<Result, State1, State2, State3, Extra> f,
 ) {
-  WeakContainer _s1, _s2, _s3;
-  WeakMap<S1, WeakMap<S2, WeakMap<S3, R>>> weakMap1;
-  WeakMap<S2, WeakMap<S3, R>> weakMap2;
-  WeakMap<S3, R> weakMap3;
+  WeakContainer? _s1, _s2, _s3;
+  late WeakMap<State1, WeakMap<State2, WeakMap<State3, Result>>> weakMap1;
+  late WeakMap<State2, WeakMap<State3, Result>> weakMap2;
+  late WeakMap<State3, Result> weakMap3;
 
-  return (S1 state1, S2 state2, S3 state3, Extra extra) {
+  return (State1 state1, State2 state2, State3 state3, Extra extra) {
     return () {
       if (_s1 == null ||
           _s2 == null ||
           _s3 == null || //
-          !_s1.contains(state1) ||
-          !_s2.contains(state2) ||
-          !_s3.contains(state3)) {
+          !_s1!.contains(state1) ||
+          !_s2!.contains(state2) ||
+          !_s3!.contains(state3)) {
         _s1 = WeakContainer(state1);
         _s2 = WeakContainer(state2);
         _s3 = WeakContainer(state3);
@@ -390,7 +390,7 @@ F3_0_x<R, S1, S2, S3, Extra> cache3states_0params_x<R, S1, S2, S3, Extra>(
       }
       //
       else {
-        return weakMap1[state1][state2][state3];
+        return weakMap1[state1]![state2]![state3];
       }
     };
   };
