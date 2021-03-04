@@ -1,4 +1,4 @@
-## [2.0.0-nullsafety.1]
+## [2.0.0]
 
 * Cache functions with extra parameters.
 * Rename of cache functions to make them easier to use.
