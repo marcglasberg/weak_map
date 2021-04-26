@@ -1,3 +1,7 @@
+## [2.0.1]
+
+* NNBD improvement.
+
 ## [2.0.0]
 
 * Cache functions with extra parameters.

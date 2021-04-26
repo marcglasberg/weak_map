@@ -152,13 +152,13 @@ List<User> filter(String text) => users.where((user)=>user.name.startsWith(text)
 This is an expensive process, so you may want to cache the filtered list. 
 
 In this example, we have a single state and a single parameter, 
-so we're going to use the `cache1_1` method:
+so we're going to use the `cache1state_1param` method:
 
 ```dart                                                    
 static List<User> filter(Users users, String text)
    => _filter(users)(text);
 
-static final _filter = cache1_1(
+static final _filter = cache1state_1param(
         (Users users) 
            => (String text) 
               => users.where((user)=>user.name.startsWith(text)).toList());
