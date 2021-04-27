@@ -41,6 +41,41 @@ void main() {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  test('Test 1 state with 0 parameters, caching null parameter.', () {
+    //
+
+    // This is some function we want to cache, for some specific `limit`.
+    List<String>? func(int? limit) {
+      return (limit == null) ? null : stateNames.take(limit).toList();
+    }
+
+    // This is the cache.
+    var _funcCached = cache1state<List<String>?, int?>((int? limit) => () => func(limit));
+
+    // And this is the cached func.
+    List<String>? funcCached(int? limit) => _funcCached(limit)();
+
+    List<String>? memoA1 = funcCached(1);
+    List<String>? memoA2 = funcCached(1);
+    expect(memoA1, ["Juan"]);
+    expect(memoA2, ["Juan"]);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    var memoB1 = _funcCached(2)();
+    var memoB2 = _funcCached(2)();
+    expect(memoB1, ["Juan", "Anna"]);
+    expect(memoB2, ["Juan", "Anna"]);
+    expect(identical(memoB1, memoB2), isTrue);
+
+    var memoC1 = _funcCached(null)();
+    var memoC2 = _funcCached(null)();
+    expect(memoC1, isNull);
+    expect(memoC2, isNull);
+    expect(identical(memoC1, memoC2), isTrue);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
   test('Test results are forgotten when the state changes (1 state with 0 parameters).', () {
     //
     var selector = cache1state((int? limit) => () {

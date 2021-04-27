@@ -23,7 +23,7 @@ F1_0<Result, State1> cache1state<Result, State1>(F1_0<Result, State1> f) {
       }
       //
       else {
-        return weakMap[s1]!;
+        return weakMap[s1] as Result;
       }
     };
   };
@@ -62,7 +62,7 @@ F1_1<Result, State1, Param1> cache1state_1param<Result, State1, Param1>(
         }
         //
         else
-          return map[p1]!;
+          return map[p1] as Result;
       }
     };
   };
@@ -102,7 +102,7 @@ F1_2<Result, State1, Param1, Param2> cache1state_2params<Result, State1, Param1,
           map[parP] = result;
           return result;
         }
-        return map[parP]!;
+        return map[parP] as Result;
       }
     };
   };
@@ -139,7 +139,7 @@ F2_0<Result, State1, State2> cache2states<Result, State1, State2>(
       }
       //
       else {
-        return weakMap1[s1]![s2]!;
+        return weakMap1[s1]![s2] as Result;
       }
     };
   };
@@ -187,7 +187,7 @@ F2_1<Result, State1, State2, Param1> cache2states_1param<Result, State1, State2,
           return result;
         }
 
-        return map[p1]!;
+        return map[p1] as Result;
       }
     };
   };
@@ -234,7 +234,7 @@ F2_2<Result, State1, State2, Param1, Param2> //
           return result;
         }
 
-        return map[par]!;
+        return map[par] as Result;
       }
     };
   };
@@ -279,7 +279,7 @@ F3_0<Result, State1, State2, State3> cache3states<Result, State1, State2, State3
       }
       //
       else {
-        return weakMap1[s1]![s2]![s3]!;
+        return weakMap1[s1]![s2]![s3] as Result;
       }
     };
   };
@@ -309,7 +309,7 @@ F1_0_x<Result, State1, Extra> cache1state_0params_x<Result, State1, Extra>(
       }
       //
       else {
-        return weakMap[state1]!;
+        return weakMap[state1] as Result;
       }
     };
   };
@@ -347,7 +347,7 @@ F2_0_x<Result, State1, State2, Extra> cache2states_0params_x<Result, State1, Sta
       }
       //
       else {
-        return weakMap1[state1]![state2]!;
+        return weakMap1[state1]![state2] as Result;
       }
     };
   };
@@ -393,7 +393,7 @@ F3_0_x<Result, State1, State2, State3, Extra>
       }
       //
       else {
-        return weakMap1[state1]![state2]![state3]!;
+        return weakMap1[state1]![state2]![state3] as Result;
       }
     };
   };

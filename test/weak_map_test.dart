@@ -86,4 +86,42 @@ void main() {
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test("getOrThrow", () async {
+    //
+    var map = WeakMap();
+    map[1] = 1;
+    map["A"] = 2;
+    map[true] = 3;
+    var obj1 = Object();
+    map[obj1] = 4;
+    var obj2 = Object();
+    map[obj2] = 5;
+
+    expect(map[1], 1);
+    expect(map.get(1), 1);
+    expect(map.getOrThrow(1), 1);
+
+    expect(map["A"], 2);
+    expect(map.get("A"), 2);
+    expect(map.getOrThrow("A"), 2);
+
+    expect(map[true], 3);
+    expect(map.get(true), 3);
+    expect(map.getOrThrow(true), 3);
+
+    expect(map[obj1], 4);
+    expect(map.get(obj1), 4);
+    expect(map.getOrThrow(obj1), 4);
+
+    expect(map[obj2], 5);
+    expect(map.get(obj2), 5);
+    expect(map.getOrThrow(obj2), 5);
+
+    expect(map[123], null);
+    expect(map.get(123), null);
+    expect(() => map.getOrThrow(123), throwsStateError);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 }
