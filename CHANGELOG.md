@@ -1,3 +1,7 @@
+## [2.0.3]
+
+* Docs improvement.
+
 ## [2.0.2]
 
 * NNBD improvement.
@@ -9,7 +13,7 @@
 
 Now, cache functions are:
 
-```dart
+```
 cache1state((state) => () => ...);
 cache1state_1param((state) => (parameter) => ...);
 cache1state_2params((state) => (parameter1, parameter2) => ...);
