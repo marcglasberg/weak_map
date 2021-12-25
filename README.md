@@ -76,15 +76,17 @@ map["John"] = null; // Same as map.remove("John")
 ```
 
 **Notes:**
-
-1. If you use null, a number, a boolean, a String, or a const type as the map key, it will act like
+         
+1. The keys are compared using object **identity**, and not object equivalence (operator `==`).
+ 
+2. If you use null, a number, a boolean, a String, or a const type as the map key, it will act like
    a regular map, because these types are never garbage-collected. All other types of object may be
    garbage-collected.
 
-2. To retrieve a value added to the map, you can use the equivalent syntaxes `var y = map[x]`
+3. To retrieve a value added to the map, you can use the equivalent syntaxes `var y = map[x]`
    or `var y = map.get(x)`.
 
-3. Doing `map[x] = y` is equivalent to `map.add(key: x, value: y)`, but the object is later
+4. Doing `map[x] = y` is equivalent to `map.add(key: x, value: y)`, but the object is later
    retrieved by **identity**.
 
 <br>
