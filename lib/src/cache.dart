@@ -211,7 +211,7 @@ F2_2<Result, State1, State2, Param1, Param2> //
 
   return (State1 s1, State2 s2) {
     return (Param1 p1, Param2 p2) {
-      var par = _Pair(p1, p2);
+      var pair = _Pair(p1, p2);
       if (_s1 == null || !_s1!.contains(s1) || !_s2!.contains(s2)) {
         _s1 = WeakContainer(s1);
         _s2 = WeakContainer(s2);
@@ -220,7 +220,7 @@ F2_2<Result, State1, State2, Param1, Param2> //
         weakMap1 = WeakMap();
         weakMap2 = WeakMap();
         Map<_Pair<Param1, Param2>, Result> map = HashMap();
-        map[par] = result;
+        map[pair] = result;
         weakMap2[s2] = map;
         weakMap1[s1] = weakMap2;
         return result;
@@ -228,13 +228,60 @@ F2_2<Result, State1, State2, Param1, Param2> //
       //
       else {
         Map<_Pair<Param1, Param2>, Result> map = weakMap1[s1]![s2]!;
-        if (!map.containsKey(par)) {
+        if (!map.containsKey(pair)) {
           var result = f(s1, s2)(p1, p2);
-          map[par] = result;
+          map[pair] = result;
           return result;
         }
 
-        return map[par] as Result;
+        return map[pair] as Result;
+      }
+    };
+  };
+}
+
+// /////////////////////////////////////////////////////////////////////////////
+
+typedef R2_3<Result, Param1, Param2, Param3> = //
+    Result Function(Param1, Param2, Param3);
+
+typedef F2_3<Result, State1, State2, Param1, Param2, Param3> = //
+    R2_3<Result, Param1, Param2, Param3> Function(State1, State2);
+
+/// Cache for 2 immutable states, and 3 parameters.
+F2_3<Result, State1, State2, Param1, Param2, Param3> //
+    cache2states_3params<Result, State1, State2, Param1, Param2, Param3>(
+        F2_3<Result, State1, State2, Param1, Param2, Param3> f) {
+  WeakContainer? _s1, _s2;
+  late WeakMap<State1, WeakMap<State2, Map<_Triad<Param1, Param2, Param3>, Result>>> weakMap1;
+  WeakMap<State2, Map<_Triad<Param1, Param2, Param3>, Result>> weakMap2;
+
+  return (State1 s1, State2 s2) {
+    return (Param1 p1, Param2 p2, Param3 p3) {
+      var triad = _Triad(p1, p2, p3);
+      if (_s1 == null || !_s1!.contains(s1) || !_s2!.contains(s2)) {
+        _s1 = WeakContainer(s1);
+        _s2 = WeakContainer(s2);
+
+        var result = f(s1, s2)(p1, p2, p3);
+        weakMap1 = WeakMap();
+        weakMap2 = WeakMap();
+        Map<_Triad<Param1, Param2, Param3>, Result> map = HashMap();
+        map[triad] = result;
+        weakMap2[s2] = map;
+        weakMap1[s1] = weakMap2;
+        return result;
+      }
+      //
+      else {
+        Map<_Triad<Param1, Param2, Param3>, Result> map = weakMap1[s1]![s2]!;
+        if (!map.containsKey(triad)) {
+          var result = f(s1, s2)(p1, p2, p3);
+          map[triad] = result;
+          return result;
+        }
+
+        return map[triad] as Result;
       }
     };
   };
@@ -417,7 +464,30 @@ class _Pair<X, Y> {
           y == other.y;
 
   @override
-  int get hashCode => x.hashCode ^ y.hashCode;
+  int get hashCode => Object.hash(x, y);
+}
+
+// /////////////////////////////////////////////////////////////////////////////
+
+class _Triad<X, Y, Z> {
+  final X x;
+  final Y y;
+  final Z z;
+
+  _Triad(this.x, this.y, this.z);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _Triad &&
+          runtimeType == other.runtimeType //
+          &&
+          x == other.x &&
+          y == other.y &&
+          z == other.z;
+
+  @override
+  int get hashCode => Object.hash(x, y, z);
 }
 
 // /////////////////////////////////////////////////////////////////////////////

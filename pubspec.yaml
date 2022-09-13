@@ -1,6 +1,6 @@
 name: weak_map
 description: WeakMap is a map where the keys are weakly referenced. WeakContainer lets you check if an object is the same you had before. Cache functions for memoization with weak-references.
-version: 2.0.4
+version: 2.1.0
 homepage: https://github.com/marcglasberg/weak_map
 # author: Marcelo Glasberg <marcglasberg@gmail.com>
 

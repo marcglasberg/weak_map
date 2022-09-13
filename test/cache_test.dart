@@ -390,7 +390,8 @@ void main() {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  test('Changing the second or the first state, it should forget the cached value.', () {
+  test('Changing the second or the first state, it should forget the cached value. '
+      '(2 states with 2 parameters)', () {
     //
     var stateNames1 = List<String>.unmodifiable(["A1a", "A2a", "A3x", "B4a", "B5a", "B6x"]);
 
@@ -432,6 +433,135 @@ void main() {
 
     var memo8 = selector(stateNames2, 1)("A", "a");
     expect(memo8, ["A1a"]);
+
+    expect(identical(memo5, memo7), isFalse);
+    expect(identical(memo6, memo8), isFalse);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Test 2 states with 3 parameters.', () {
+    //
+    var selector = cache2states_3params((List<String> names, int limit) =>
+        (String startString, String endString, String containsString) {
+          return names
+              .where((str) =>
+                  str.startsWith(startString) &&
+                  str.endsWith(endString) &&
+                  str.contains(containsString))
+              .take(limit)
+              .toList();
+        });
+
+    expect(selector(stateNames, 1)("A", "a", "x"), []);
+
+    var memoA1 = selector(stateNames, 1)("A", "a", "n");
+    var memoA2 = selector(stateNames, 1)("A", "a", "n");
+    expect(memoA1, ["Anna"]);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    var memoB1 = selector(stateNames, 2)("A", "a", "n");
+    var memoB2 = selector(stateNames, 2)("A", "a", "n");
+    expect(memoB1, ["Anna", "Amanda"]);
+    expect(identical(memoB1, memoB2), isTrue);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Test results are forgotten when the state changes (2 states with 3 parameters).', () {
+    //
+    var selector = cache2states_3params((List<String> names, int limit) =>
+        (String startString, String endString, String containsString) {
+          return names
+              .where((str) =>
+                  str.startsWith(startString) &&
+                  str.endsWith(endString) &&
+                  str.contains(containsString))
+              .take(limit)
+              .toList();
+        });
+
+    var memoA1 = selector(stateNames, 1)("A", "a", "n");
+    var memoA2 = selector(stateNames, 1)("A", "a", "n");
+    expect(memoA1, ["Anna"]);
+    expect(identical(memoA1, memoA2), isTrue);
+
+    // Same state with another parameter.
+    // Then try reading the previous state, with the same parameter as before.
+    // Result is the same instance.
+    var memoA3 = selector(stateNames, 1)("A", "a", "x");
+    var memoA4 = selector(stateNames, 1)("A", "a", "n");
+    var memoA5 = selector(stateNames, 1)("A", "a", "n");
+    var memoA6 = selector(stateNames, 1)("A", "a", "x");
+    expect(memoA3, []);
+    expect(memoA4, ["Anna"]);
+    expect(memoA5, ["Anna"]);
+    expect(memoA6, []);
+    expect(identical(memoA4, memoA5), isTrue);
+    expect(identical(memoA3, memoA6), isTrue);
+
+    // ---
+
+    // Another state with the same parameter.
+    selector(stateNames, 2)("A", "a", "n");
+
+    // Try reading the previous state, with the same parameter as before.
+    var memoA7 = selector(stateNames, 1)("A", "a", "x");
+    var memoA8 = selector(stateNames, 1)("A", "a", "n");
+    expect(memoA7, []);
+    expect(memoA8, ["Anna"]);
+    expect(identical(memoA7, memoA3), isFalse);
+    expect(identical(memoA8, memoA4), isFalse);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  test('Changing the second or the first state, it should forget the cached value. '
+      '(2 states with 3 parameters)', () {
+    //
+    var stateNames1 = List<String>.unmodifiable(["A1na", "A2na", "A3nx", "B4na", "B5na", "B6nx"]);
+
+    var selector = cache2states_3params((List<String> names, int limit) =>
+        (String startString, String endString, String containsString) {
+          return names
+              .where((str) =>
+                  str.startsWith(startString) &&
+                  str.endsWith(endString) &&
+                  str.contains(containsString))
+              .take(limit)
+              .toList();
+        });
+
+    var memo1 = selector(stateNames1, 1)("A", "a", "n");
+    expect(memo1, ["A1na"]);
+
+    var memo2 = selector(stateNames1, 2)("A", "a", "n");
+    expect(memo2, ["A1na", "A2na"]);
+
+    var memo3 = selector(stateNames1, 1)("A", "a", "n");
+    expect(memo3, ["A1na"]);
+
+    var memo4 = selector(stateNames1, 2)("A", "a", "n");
+    expect(memo4, ["A1na", "A2na"]);
+
+    expect(identical(memo1, memo3), isFalse);
+    expect(identical(memo2, memo4), isFalse);
+
+    // ---
+
+    var stateNames2 = List<String>.unmodifiable(["A1na", "A2na", "A3nx", "B4na", "B5na", "B6nx"]);
+
+    var memo5 = selector(stateNames1, 1)("A", "a", "n");
+    expect(memo5, ["A1na"]);
+
+    var memo6 = selector(stateNames2, 1)("A", "a", "n");
+    expect(memo6, ["A1na"]);
+
+    var memo7 = selector(stateNames1, 1)("A", "a", "n");
+    expect(memo7, ["A1na"]);
+
+    var memo8 = selector(stateNames2, 1)("A", "a", "n");
+    expect(memo8, ["A1na"]);
 
     expect(identical(memo5, memo7), isFalse);
     expect(identical(memo6, memo8), isFalse);

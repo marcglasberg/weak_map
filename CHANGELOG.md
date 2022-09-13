@@ -1,3 +1,7 @@
+## [2.1.0] - 2021/09/13
+
+* `cache2states_3params((state1, state2) => (param1, param2, param3) => ...);`
+
 ## [2.0.4] - 2021/12/25
 
 * Docs improvement.
@@ -16,10 +20,10 @@ Now, cache functions are:
 ```
 cache1state((state) => () => ...);
 cache1state_1param((state) => (parameter) => ...);
-cache1state_2params((state) => (parameter1, parameter2) => ...);
+cache1state_2params((state) => (param1, param2) => ...);
 cache2states((state1, state2) => () => ...);
 cache2states_1param((state1, state2) => (parameter) => ...);
-cache2states_2params((state1, state2) => (parameter1, parameter2) => ...);
+cache2states_2params((state1, state2) => (param1, param2) => ...);
 cache3states((state1, state2, state3) => () => ...);
 cache1state_0params_x((state1, extra) => () => ...);
 cache2states_0params_x((state1, state2, extra) => () => ...);

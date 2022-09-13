@@ -1,6 +1,4 @@
 import 'package:test/test.dart';
-import 'package:weak_map/src/weak_container.dart';
-
 import 'package:weak_map/weak_map.dart';
 
 void main() {
