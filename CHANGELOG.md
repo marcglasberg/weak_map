@@ -1,3 +1,7 @@
+## [3.0.0] - 2021/05/12
+
+* Flutter 3.10.0 and Dart 3.0.0
+
 ## [2.1.0] - 2021/09/13
 
 * `cache2states_3params((state1, state2) => (param1, param2, param3) => ...);`
