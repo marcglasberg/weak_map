@@ -2,8 +2,6 @@ import 'package:test/test.dart';
 import 'package:weak_map/weak_map.dart';
 
 void main() {
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Add number/String/boolean to map.", () {
     var map = WeakMap();
 
@@ -30,8 +28,6 @@ void main() {
     expect(map[null], obj5);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Using null as the map value.", () {
     var map = WeakMap();
 
@@ -49,8 +45,6 @@ void main() {
     expect(map.contains("A"), false);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Using null as the map key.", () {
     var map = WeakMap();
 
@@ -67,8 +61,6 @@ void main() {
     expect(map.contains(null), false);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Using null in the map.", () async {
     var map = WeakMap();
 
@@ -84,8 +76,6 @@ void main() {
     expect(map[null], null);
     expect(map.contains(null), false);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test("getOrThrow", () async {
     //
@@ -122,6 +112,4 @@ void main() {
     expect(map.get(123), null);
     expect(() => map.getOrThrow(123), throwsStateError);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 }

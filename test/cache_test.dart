@@ -4,8 +4,6 @@ import 'package:weak_map/weak_map.dart';
 void main() {
   var stateNames = List<String>.unmodifiable(["Juan", "Anna", "Bill", "Zack", "Arnold", "Amanda"]);
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 1 state with 0 parameters.', () {
     //
 
@@ -38,8 +36,6 @@ void main() {
     expect(memoC2, []);
     expect(identical(memoC1, memoC2), isTrue);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 1 state with 0 parameters, caching null parameter.', () {
     //
@@ -74,8 +70,6 @@ void main() {
     expect(identical(memoC1, memoC2), isTrue);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test results are forgotten when the state changes (1 state with 0 parameters).', () {
     //
     var selector = cache1state((int? limit) => () {
@@ -95,8 +89,6 @@ void main() {
     expect(memoA5, ["Juan"]);
     expect(identical(memoA5, memoA1), isFalse);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Also works when changing to null (1 state with 0 parameters).', () {
     //
@@ -118,8 +110,6 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Also works when changing from null (1 state with 0 parameters).', () {
     //
     var selector = cache1state((int? limit) => () {
@@ -140,8 +130,6 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 1 state with 1 parameter.', () {
     //
     var selector = cache1state_1param((List<String> state) => (String startString) {
@@ -159,8 +147,6 @@ void main() {
     expect(memoA3, ["Anna", "Arnold", "Amanda"]);
     expect(identical(memoA1, memoA3), isTrue);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test results are forgotten when the state changes (1 state with 1 parameter).', () {
     //
@@ -182,8 +168,6 @@ void main() {
     expect(memoA5, ["Anna", "Arnold", "Amanda"]);
     expect(identical(memoA5, memoA1), isFalse);
   });
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 1 state with 2 parameters.', () {
     //
@@ -218,8 +202,6 @@ void main() {
     expect(identical(memoA1, memoA3), isTrue);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test results are forgotten when the state changes (1 state with 2 parameters).', () {
     //
     var selector =
@@ -244,8 +226,6 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 2 states with 0 parameters.', () {
     //
     var selector = cache2states((List<String> names, int limit) => () {
@@ -263,8 +243,6 @@ void main() {
     expect(memoB1, ["Anna", "Arnold"]);
     expect(identical(memoB1, memoB2), isTrue);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test results are forgotten when the state changes (2 states with 0 parameters).', () {
     //
@@ -285,8 +263,6 @@ void main() {
     expect(memoA5, ["Anna"]);
     expect(identical(memoA5, memoA1), isFalse);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test 2 states with 1 parameter.', () {
     //
@@ -315,8 +291,6 @@ void main() {
     expect(identical(memoA1, memoC), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test results are forgotten when the state changes (2 states with 1 parameter).', () {
     //
     var selector = cache2states_1param((List<String> names, int limit) => (String searchString) {
@@ -338,8 +312,6 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 2 states with 2 parameters.', () {
     //
     var selector = cache2states_2params(
@@ -360,8 +332,6 @@ void main() {
     expect(memoB1, ["Anna", "Amanda"]);
     expect(identical(memoB1, memoB2), isTrue);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test results are forgotten when the state changes (2 states with 2 parameters).', () {
     //
@@ -388,9 +358,8 @@ void main() {
     expect(identical(memoA5, memoA1), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  test('Changing the second or the first state, it should forget the cached value. '
+  test(
+      'Changing the second or the first state, it should forget the cached value. '
       '(2 states with 2 parameters)', () {
     //
     var stateNames1 = List<String>.unmodifiable(["A1a", "A2a", "A3x", "B4a", "B5a", "B6x"]);
@@ -438,8 +407,6 @@ void main() {
     expect(identical(memo6, memo8), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 2 states with 3 parameters.', () {
     //
     var selector = cache2states_3params((List<String> names, int limit) =>
@@ -465,8 +432,6 @@ void main() {
     expect(memoB1, ["Anna", "Amanda"]);
     expect(identical(memoB1, memoB2), isTrue);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test('Test results are forgotten when the state changes (2 states with 3 parameters).', () {
     //
@@ -514,9 +479,8 @@ void main() {
     expect(identical(memoA8, memoA4), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  test('Changing the second or the first state, it should forget the cached value. '
+  test(
+      'Changing the second or the first state, it should forget the cached value. '
       '(2 states with 3 parameters)', () {
     //
     var stateNames1 = List<String>.unmodifiable(["A1na", "A2na", "A3nx", "B4na", "B5na", "B6nx"]);
@@ -567,8 +531,6 @@ void main() {
     expect(identical(memo6, memo8), isFalse);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test('Test 3 states with 0 parameters.', () {
     //
     var selector = cache3states((
@@ -618,6 +580,4 @@ void main() {
     expect(memoB, ["Anna"]);
     expect(identical(memoA, memoB), isFalse);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -2,8 +2,6 @@ import 'dart:collection';
 
 import 'package:weak_map/weak_map.dart';
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef R1_0<Result> = Result Function();
 typedef F1_0<Result, State1> = R1_0<Result> Function(State1);
 
@@ -28,8 +26,6 @@ F1_0<Result, State1> cache1state<Result, State1>(F1_0<Result, State1> f) {
     };
   };
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 typedef R1_1<Result, Param1> = Result Function(Param1);
 typedef F1_1<Result, State1, Param1> = R1_1<Result, Param1> Function(State1);
@@ -67,8 +63,6 @@ F1_1<Result, State1, Param1> cache1state_1param<Result, State1, Param1>(
     };
   };
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 typedef R1_2<Result, Param1, Param2> = //
     Result Function(Param1, Param2);
@@ -108,8 +102,6 @@ F1_2<Result, State1, Param1, Param2> cache1state_2params<Result, State1, Param1,
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef R2_0<Result> = Result Function();
 typedef F2_0<Result, State1, State2> = R2_0<Result> Function(State1, State2);
 
@@ -145,9 +137,8 @@ F2_0<Result, State1, State2> cache2states<Result, State1, State2>(
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef R2_1<Result, Param1> = Result Function(Param1);
+
 typedef F2_1<Result, State1, State2, Param1> = R2_1<Result, Param1> Function(
   State1,
   State2,
@@ -192,8 +183,6 @@ F2_1<Result, State1, State2, Param1> cache2states_1param<Result, State1, State2,
     };
   };
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 typedef R2_2<Result, Param1, Param2> = //
     Result Function(Param1, Param2);
@@ -240,8 +229,6 @@ F2_2<Result, State1, State2, Param1, Param2> //
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef R2_3<Result, Param1, Param2, Param3> = //
     Result Function(Param1, Param2, Param3);
 
@@ -287,8 +274,6 @@ F2_3<Result, State1, State2, Param1, Param2, Param3> //
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef R3_0<Result> = //
     Result Function();
 
@@ -332,8 +317,6 @@ F3_0<Result, State1, State2, State3> cache3states<Result, State1, State2, State3
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 typedef F1_0_x<Result, State1, Extra> = R1_0<Result> Function(State1, Extra);
 
 /// Cache for 1 immutable state, no parameters, and some extra information.
@@ -361,8 +344,6 @@ F1_0_x<Result, State1, Extra> cache1state_0params_x<Result, State1, Extra>(
     };
   };
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 typedef F2_0_x<Result, State1, State2, Extra> = R2_0<Result> Function(State1, State2, Extra);
 
@@ -399,8 +380,6 @@ F2_0_x<Result, State1, State2, Extra> cache2states_0params_x<Result, State1, Sta
     };
   };
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 typedef F3_0_x<Result, State1, State2, State3, Extra> = R3_0<Result> Function(
     State1, State2, State3, Extra);
@@ -446,8 +425,6 @@ F3_0_x<Result, State1, State2, State3, Extra>
   };
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-
 class _Pair<X, Y> {
   final X x;
   final Y y;
@@ -466,8 +443,6 @@ class _Pair<X, Y> {
   @override
   int get hashCode => Object.hash(x, y);
 }
-
-// /////////////////////////////////////////////////////////////////////////////
 
 class _Triad<X, Y, Z> {
   final X x;
@@ -489,5 +464,3 @@ class _Triad<X, Y, Z> {
   @override
   int get hashCode => Object.hash(x, y, z);
 }
-
-// /////////////////////////////////////////////////////////////////////////////

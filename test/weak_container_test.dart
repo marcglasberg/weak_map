@@ -2,8 +2,6 @@ import 'package:test/test.dart';
 import 'package:weak_map/weak_map.dart';
 
 void main() {
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Contains.", () {
     expect(WeakContainer(1).contains(1), true);
     expect(WeakContainer(1).contains(2), false);
@@ -40,16 +38,12 @@ void main() {
     expect(WeakContainer(null).contains(obj1), false);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Clear.", () {
     var container = WeakContainer(1);
     expect(container.contains(1), true);
     container.clear();
     expect(container.contains(1), false);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   test("Using null in the map.", () {
     var map = WeakMap();
@@ -67,8 +61,6 @@ void main() {
     expect(map.contains(null), false);
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
   test("Using null in the map.", () async {
     var map = WeakMap();
 
@@ -84,6 +76,4 @@ void main() {
     expect(map[null], null);
     expect(map.contains(null), false);
   });
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 }
