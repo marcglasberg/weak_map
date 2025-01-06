@@ -1,6 +1,15 @@
-[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+[![Pub popularity](https://badgen.net/pub/popularity/weak_map)](https://pub.dev/packages/weak_map)
+[![Pub Version](https://img.shields.io/pub/v/weak_map?style=flat-square&logo=dart)](https://pub.dev/packages/weak_map)
+[![GitHub stars](https://img.shields.io/github/stars/marcglasberg/weak_map?style=social)](https://github.com/marcglasberg/weak_map)
+![GitHub repo size](https://img.shields.io/github/repo-size/marcglasberg/weak_map?style=flat-square)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+[![Developed by Marcelo Glasberg](https://img.shields.io/badge/Developed%20by%20Marcelo%20Glasberg-blue.svg)](https://glasberg.dev/)
+[![Glasberg.dev on pub.dev](https://img.shields.io/pub/publisher/weak_map.svg)](https://pub.dev/publishers/glasberg.dev/packages)
+[![Platforms](https://badgen.net/pub/flutter-platform/weak_map)](https://pub.dev/packages/weak_map)
 
-[![pub package](https://img.shields.io/pub/v/weak_map.svg)](https://pub.dartlang.org/packages/weak_map)
+#### Sponsor
+
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
 # weak_map
 
@@ -270,3 +279,5 @@ _stackoverflow.com/users/3411681/marcg_</a>
   (versions: <a href="https://habr.com/ru/post/500210/">русский</a>)
 * <a href="https://medium.com/flutter-community/the-new-way-to-create-themes-in-your-flutter-app-7fdfc4f3df5f">
   The New Way to create Themes in your Flutter App</a> 
+
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
