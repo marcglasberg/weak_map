@@ -1,8 +1,22 @@
-## 4.0.1
-
 * Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+
+## 4.0.2
+
+* Fixed unsafe cast. 
+
+* Fixed `getOrThrow` not throwing a `StateError` for missing object keys.
+
+* Fixed records crashing `WeakMap`, `WeakContainer` and the cache functions.
+  Records are now treated like Strings and numbers (compared by equality).
+  Requires Dart 3.0.0.
+
+* Fixed a memory leak in the cache functions with 2 or 3 states, which could
+  keep the first state and the cached result in memory after they were no
+  longer used.
+
+* Many more tests, including garbage-collection tests.
 
 ## 3.0.1
 

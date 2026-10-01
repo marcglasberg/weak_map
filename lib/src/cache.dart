@@ -111,7 +111,6 @@ F2_0<Result, State1, State2> cache2states<Result, State1, State2>(
 ) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Result>> weakMap1;
-  WeakMap<State2, Result> weakMap2;
 
   return (State1 s1, State2 s2) {
     return () {
@@ -124,7 +123,7 @@ F2_0<Result, State1, State2> cache2states<Result, State1, State2>(
 
         var result = f(s1, s2)();
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
+        WeakMap<State2, Result> weakMap2 = WeakMap();
         weakMap2[s2] = result;
         weakMap1[s1] = weakMap2;
         return result;
@@ -149,7 +148,6 @@ F2_1<Result, State1, State2, Param1> cache2states_1param<Result, State1, State2,
     F2_1<Result, State1, State2, Param1> f) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Map<Param1, Result>>> weakMap1;
-  WeakMap<State2, Map<Param1, Result>> weakMap2;
 
   return (State1 s1, State2 s2) {
     return (Param1 p1) {
@@ -162,7 +160,7 @@ F2_1<Result, State1, State2, Param1> cache2states_1param<Result, State1, State2,
 
         var result = f(s1, s2)(p1);
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
+        WeakMap<State2, Map<Param1, Result>> weakMap2 = WeakMap();
         Map<Param1, Result> map = HashMap();
         map[p1] = result;
         weakMap2[s2] = map;
@@ -196,7 +194,6 @@ F2_2<Result, State1, State2, Param1, Param2> //
         F2_2<Result, State1, State2, Param1, Param2> f) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Map<_Pair<Param1, Param2>, Result>>> weakMap1;
-  WeakMap<State2, Map<_Pair<Param1, Param2>, Result>> weakMap2;
 
   return (State1 s1, State2 s2) {
     return (Param1 p1, Param2 p2) {
@@ -207,7 +204,7 @@ F2_2<Result, State1, State2, Param1, Param2> //
 
         var result = f(s1, s2)(p1, p2);
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
+        WeakMap<State2, Map<_Pair<Param1, Param2>, Result>> weakMap2 = WeakMap();
         Map<_Pair<Param1, Param2>, Result> map = HashMap();
         map[pair] = result;
         weakMap2[s2] = map;
@@ -241,7 +238,6 @@ F2_3<Result, State1, State2, Param1, Param2, Param3> //
         F2_3<Result, State1, State2, Param1, Param2, Param3> f) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Map<_Triad<Param1, Param2, Param3>, Result>>> weakMap1;
-  WeakMap<State2, Map<_Triad<Param1, Param2, Param3>, Result>> weakMap2;
 
   return (State1 s1, State2 s2) {
     return (Param1 p1, Param2 p2, Param3 p3) {
@@ -252,7 +248,7 @@ F2_3<Result, State1, State2, Param1, Param2, Param3> //
 
         var result = f(s1, s2)(p1, p2, p3);
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
+        WeakMap<State2, Map<_Triad<Param1, Param2, Param3>, Result>> weakMap2 = WeakMap();
         Map<_Triad<Param1, Param2, Param3>, Result> map = HashMap();
         map[triad] = result;
         weakMap2[s2] = map;
@@ -285,8 +281,6 @@ F3_0<Result, State1, State2, State3> cache3states<Result, State1, State2, State3
     F3_0<Result, State1, State2, State3> f) {
   WeakContainer? _s1, _s2, _s3;
   late WeakMap<State1, WeakMap<State2, WeakMap<State3, Result>>> weakMap1;
-  WeakMap<State2, WeakMap<State3, Result>> weakMap2;
-  WeakMap<State3, Result> weakMap3;
 
   return (State1 s1, State2 s2, State3 s3) {
     return () {
@@ -302,8 +296,8 @@ F3_0<Result, State1, State2, State3> cache3states<Result, State1, State2, State3
 
         var result = f(s1, s2, s3)();
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
-        weakMap3 = WeakMap();
+        WeakMap<State2, WeakMap<State3, Result>> weakMap2 = WeakMap();
+        WeakMap<State3, Result> weakMap3 = WeakMap();
         weakMap3[s3] = result;
         weakMap2[s2] = weakMap3;
         weakMap1[s1] = weakMap2;
@@ -355,7 +349,6 @@ F2_0_x<Result, State1, State2, Extra> cache2states_0params_x<Result, State1, Sta
 ) {
   WeakContainer? _s1, _s2;
   late WeakMap<State1, WeakMap<State2, Result>> weakMap1;
-  late WeakMap<State2, Result> weakMap2;
 
   return (State1 state1, State2 state2, Extra extra) {
     return () {
@@ -368,7 +361,7 @@ F2_0_x<Result, State1, State2, Extra> cache2states_0params_x<Result, State1, Sta
 
         var result = f(state1, state2, extra)();
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
+        WeakMap<State2, Result> weakMap2 = WeakMap();
         weakMap2[state2] = result;
         weakMap1[state1] = weakMap2;
         return result;
@@ -393,8 +386,6 @@ F3_0_x<Result, State1, State2, State3, Extra>
 ) {
   WeakContainer? _s1, _s2, _s3;
   late WeakMap<State1, WeakMap<State2, WeakMap<State3, Result>>> weakMap1;
-  late WeakMap<State2, WeakMap<State3, Result>> weakMap2;
-  late WeakMap<State3, Result> weakMap3;
 
   return (State1 state1, State2 state2, State3 state3, Extra extra) {
     return () {
@@ -410,8 +401,8 @@ F3_0_x<Result, State1, State2, State3, Extra>
 
         var result = f(state1, state2, state3, extra)();
         weakMap1 = WeakMap();
-        weakMap2 = WeakMap();
-        weakMap3 = WeakMap();
+        WeakMap<State2, WeakMap<State3, Result>> weakMap2 = WeakMap();
+        WeakMap<State3, Result> weakMap3 = WeakMap();
         weakMap3[state3] = result;
         weakMap2[state2] = weakMap3;
         weakMap1[state1] = weakMap2;

@@ -90,7 +90,7 @@ map["John"] = null; // Same as map.remove("John")
          
 1. The keys are compared using object **identity**, and not object equivalence (operator `==`).
  
-2. If you use null, a number, a boolean, a String, or a const type as the map key, it will act like
+2. If you use null, a number, a boolean, a String, a record, or a const type as the map key, it will act like
    a regular map, because these types are never garbage-collected. All other types of object may be
    garbage-collected.
 

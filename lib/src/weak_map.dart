@@ -31,7 +31,7 @@
 ///
 /// Notes:
 ///
-/// 1. If you use null, a number, a boolean, a String, or a const type as the
+/// 1. If you use null, a number, a boolean, a String, a record, or a const type as the
 /// map key, it will act like a regular map, because these types are never
 /// garbage-collected. All other types of object may be garbage-collected.
 ///
@@ -47,7 +47,7 @@ class WeakMap<K, V> {
         _expando = Expando();
 
   static bool _allowedInExpando(Object? value) =>
-      value is! String && value is! num && value is! bool && value != null;
+      value is! String && value is! num && value is! bool && value is! Record && value != null;
 
   void operator []=(K key, V value) => add(key: key, value: value);
 
@@ -80,16 +80,18 @@ class WeakMap<K, V> {
 
   /// Returns the value associated with this key.
   /// It will throw if the key doesn't exist in the map.
-  /// Note this may only return null if V is nullable.
-  ///
-  /// This is the same as using the [] operator.
+  /// Note this may only return null if V is nullable, and only for keys that
+  /// act like a regular map (null, number, boolean, String, record) which were
+  /// explicitly set to null. For other keys, a null value throws.
   ///
   V getOrThrow(K key) {
     if (_map.containsKey(key))
       return _map[key] as V;
     else {
-      if (_allowedInExpando(key))
-        return _expando[key!] as V;
+      // The expando returns null for keys that don't exist.
+      var value = _allowedInExpando(key) ? _expando[key!] : null;
+      if (value != null)
+        return value as V;
       else
         throw StateError("No value for key.");
     }

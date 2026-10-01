@@ -53,5 +53,5 @@ class WeakContainer {
   }
 
   static bool _allowedInExpando(Object? value) =>
-      value is! String && value is! num && value is! bool && value != null;
+      value is! String && value is! num && value is! bool && value is! Record && value != null;
 }
