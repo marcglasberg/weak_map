@@ -76,7 +76,7 @@ class WeakMap<K, V> {
   V? get(K key) => _map.containsKey(key)
       ? //
       _map[key]
-      : (_allowedInExpando(key) ? _expando[key!] as V : null);
+      : (_allowedInExpando(key) ? _expando[key!] as V? : null);
 
   /// Returns the value associated with this key.
   /// It will throw if the key doesn't exist in the map.
