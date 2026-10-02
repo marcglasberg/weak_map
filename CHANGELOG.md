@@ -2,7 +2,7 @@
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-## 4.1.1
+## 4.1.2
 
 * `WeakContainer` is now deprecated. It was created when Dart had no weak
   references. Use Dart's native `WeakReference` instead: replace
