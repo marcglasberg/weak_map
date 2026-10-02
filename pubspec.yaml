@@ -1,6 +1,6 @@
 name: weak_map
 description: WeakMap is a map whose keys are weakly held, to attach data to objects without keeping them alive. Cache functions for memoization over immutable state.
-version: 4.1.0
+version: 4.1.1
 # author: Marcelo Glasberg <marcglasberg@gmail.com>
 homepage: https://github.com/marcglasberg/weak_map
 topics:

@@ -1,4 +1,3 @@
-[![Pub popularity](https://badgen.net/pub/popularity/weak_map)](https://pub.dev/packages/weak_map)
 [![Pub Version](https://img.shields.io/pub/v/weak_map?style=flat-square&logo=dart)](https://pub.dev/packages/weak_map)
 [![GitHub stars](https://img.shields.io/github/stars/marcglasberg/weak_map?style=social)](https://github.com/marcglasberg/weak_map)
 ![GitHub repo size](https://img.shields.io/github/repo-size/marcglasberg/weak_map?style=flat-square)
