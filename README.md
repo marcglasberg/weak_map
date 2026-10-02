@@ -13,187 +13,244 @@
 
 # weak_map
 
-This package contains the classes:
+This package gives you:
 
-* **WeakMap**
-* **WeakContainer**
+* **WeakMap**: A map whose keys are weakly held. You use it to attach values to objects
+  without keeping those objects alive.
 
-And also the functions:
 
-* **cache1state**
-* **cache1state_1param**
-* **cache1state_2params**
-* **cache2states**
-* **cache2states_1param**
-* **cache2states_2params**
-* **cache3states**
-* **cache1state_0params_x**
-* **cache2states_0params_x**
-* **cache3states_0params_x**
+* **Cache functions**: Memoization of expensive calculations over immutable state, with
+  the cached results discarded when the state changes or is no longer used. They are
+  similar to the selectors of the <a href="https://pub.dev/packages/reselect">reselect</a>
+  package, but better:
 
-### Why is this package useful?
+  `cache1state`, `cache1state_1param`, `cache1state_2params`,
+  `cache2states`, `cache2states_1param`, `cache2states_2params`, `cache2states_3params`,
+  `cache3states`,
+  `cache1state_0params_x`, `cache2states_0params_x`, `cache3states_0params_x`.
 
-1. Dart doesn't allow for real <a href="https://en.wikipedia.org/wiki/Weak_reference">
-   weak-references</a>, but this package allows you to go as close as possible
-   (internally it uses the <a href="https://api.flutter.dev/flutter/dart-core/Expando-class.html">
-   Expando</a> class). The Dart engine stores a value in memory while it is reachable (and can
-   potentially be used). Usually, keys in a map are considered reachable and kept in memory while
-   the map itself is in memory. This means if we put an object into a map or into a variable, then
-   while the map is alive, the object will be alive as well, even if there are no other references
-   to it. It occupies memory and may not be garbage collected. WeakMap and WeakContainer are
-   fundamentally different in this aspect. They don't prevent garbage-collection of key objects.
+<br>
 
-2. Caches that keep the result of expensive processes calculated over immutable data can also
-   benefit from weak-maps. I here provide functions similar to the ones of the
-   <a href="https://pub.dev/packages/reselect">reselect</a> package, but better. This can be used
-   with Redux or with any other calculations over immutable data.
+## First, Dart's own WeakReference
+
+When this package was created, Dart had no
+<a href="https://en.wikipedia.org/wiki/Weak_reference">weak references</a>.
+Since Dart 2.17, it has one built in:
+<a href="https://api.dart.dev/stable/dart-core/WeakReference-class.html">
+WeakReference</a>.
+
+A `WeakReference` points to a **single object** without keeping that object alive. While
+other
+parts of your program use the object, `target` returns it. After the object is
+garbage-collected, `target` returns `null`:
+
+```
+var user = User("John");
+var ref = WeakReference(user);
+
+// User("John"), while the user is still in use.
+print(ref.target); 
+
+// Later, if nothing else uses the user, it may be garbage-collected:
+print(ref.target); // null
+```
+
+Use it when **one** object needs to point to **another** object, but shouldn't be the
+reason that object stays in memory. Examples are a child pointing back to its parent, a
+listener registry that shouldn't keep the listeners alive, or a "last seen" object you'll
+reuse if it's still around.
+
+Things to know:
+
+* You must check `target` for `null` every time you use it, since the garbage-collector
+  can run at any moment.
+
+* `WeakReference` throws an `ArgumentError` for numbers, Strings, booleans, records and
+  `null`.
+
+* `WeakReference` compares by identity, so two references to the same object are **not**
+  equal (`WeakReference(a) != WeakReference(a)`).
+
+* If you need to run some code when the object is collected, use Dart's
+  <a href="https://api.dart.dev/stable/dart-core/Finalizer-class.html">Finalizer</a>.
 
 <br>
 
 ## WeakMap
 
-A WeakMap lets you garbage-collect its keys. Please note the **keys** can be garbage-collected, not
-their corresponding values.
-
-This means if you use some object as a key to a map-entry, this alone will not prevent Dart to
-garbage-collect this object.
-
-In other words, after all other references to that object have been destroyed, its entry
-(key and value) may be removed automatically from the map at any moment. To create a map:
+A `WeakMap` is a map whose **keys** are held weakly. If you use some object as a key, the
+map alone won't keep that object alive. After all other references to the key are gone,
+the key may be garbage-collected, and its whole entry (key **and** value) disappears from
+the map.
 
 ```
-var map = WeakMap();
-```    
+var map = WeakMap<User, Avatar>();
 
-To add and retrieve a value:
-
-```
-map["John"] = 42;
-var age = map["John"];
-```
-
-The following map methods work as expected:
-
-```
-map.remove("John")
-map.clear()
-map.contains("John"))
+map[user] = avatar; // Add.
+var a = map[user]; // Read. Same as map.get(user).
+map.contains(user); // true
+map.remove(user); // Remove.
+map.clear(); // Remove everything.
 ```
 
-However, adding some `null` value to the map is the same as removing the key:
+Note only the **keys** are weak. The values are kept alive for as long as their keys are
+alive.
 
-```
-map["John"] = null; // Same as map.remove("John")
-```
+### Why it's useful
 
-**Notes:**
-         
-1. The keys are compared using object **identity**, and not object equivalence (operator `==`).
- 
-2. If you use null, a number, a boolean, a String, a record, or a const type as the map key, it will act like
-   a regular map, because these types are never garbage-collected. All other types of object may be
-   garbage-collected.
+A `WeakMap` lets you **associate data with objects you don't control**, without having to
+remember to clean it up. For example:
 
-3. To retrieve a value added to the map, you can use the equivalent syntaxes `var y = map[x]`
-   or `var y = map.get(x)`.
+* **Metadata.** You want to attach some extra information to objects that belong to
+  another library, or to classes you can't change. With a regular `Map`, you'd have to
+  remove the entry when the object is no longer used, or the map would grow forever. With
+  a `WeakMap`, the entry goes away by itself.
 
-4. Doing `map[x] = y` is equivalent to `map.add(key: x, value: y)`, but the object is later
-   retrieved by **identity**.
+* **Caching results per object.** You calculate something expensive from an immutable
+  object (a layout, a parsed version, a filtered list), and want to reuse it while that
+  object is still around. The cache functions of this package are built on this idea.
 
-<br>
+* **Tracking objects.** You want to mark objects as "already processed", "visited" or
+  "seen", without keeping them in memory after everyone else stopped using them.
 
-## WeakContainer
+### WeakMap vs. WeakReference
 
-As previously explained, Dart doesn't have real weak-references. But you can check that some object
-is the same you had before.
+Neither of them keeps objects alive, but they solve different problems:
 
-To create a weak-container:
+* A `WeakReference` is a **pointer** to one object. It answers: _"Is this object still
+  alive, and if so, give it to me."_
 
-```
-var obj = Object();
-var ref = WeakContainer(obj);
-var someObj = Random().nextBool() ? obj : Object();
-print(ref.contains(someObj)); // True or false.
-```
+* A `WeakMap` is a **lookup table** from objects to values. It answers: _"I have this
+  object here. What value did I attach to it?"_
 
-This will print `true` if `someObj` is the same as the original `obj`, and will print `false` if
-it's a different object, compared by identity. If all references to the original `obj` have been
-destroyed, the weak-container will **not** prevent `obj` to be garbage-collected.
+You could try to build a weak map yourself with `Map<WeakReference<User>, Avatar>`, but it
+doesn't work well:
 
-<br>
+1. **You can't look things up.** `WeakReference` uses identity for `==`, so
+   `map[WeakReference(user)]` creates a new reference that never matches the one in the
+   map. You'd have to key the map by `identityHashCode(user)` and then handle hash
+   collisions yourself.
 
-### Why doesn't Dart allow for real weak-references, anyway?
+2. **Dead entries pile up.** When a key is collected, its entry stays in the map, with a
+   `WeakReference` whose `target` is now `null`, and a value that is still taking up
+   memory. You'd need a `Finalizer`, or periodic sweeps, to remove them.
 
-Because the creators of Dart don't want the GC (garbage-collector) to be "visible".
+3. **Values can keep their own keys alive.** If the value references its key (which is
+   common, for example `map[user] = Avatar(owner: user)`), then the regular map keeps the
+   value alive, the value keeps the key alive, and the key is **never** collected. That's
+   a memory leak. `WeakMap` doesn't have this problem: a value only stays alive because of
+   its key, and never keeps that key alive.
 
-Expandos are not equivalent to weak-references (meaning the Java `WeakReference` behavior). A weak
-reference is one that doesn't keep the referenced object alive, so the weak reference value may
-change to `null` at any time in the program. This makes the GC visible in the program.
+`WeakMap` takes care of all of this for you. Internally it uses Dart's
+<a href="https://api.dart.dev/stable/dart-core/Expando-class.html">Expando</a>, which is
+supported by the garbage-collector itself.
 
-Expandos are maps (from key to value) which won't keep the key alive. There is no way to distinguish
-an Expando that garbage collects the entry when the key dies, and one that doesn't, because you
-don't have the key to do the lookup anymore.
+### When to use which
 
-Basically, it means that an expando keeps a value alive as long as you have a reference to both the
-expando and the key, and after that, you can't check if the entry is there or not. With expandos,
-the GC need not be part of the language specification. It's just an optimization that
-implementations (are expected to) do to release memory that isn't needed anymore. Disabling the GC
-will not change the behavior of programs unless they run out of memory.
+| You want to                                                                   | Use                                                |
+|-------------------------------------------------------------------------------|----------------------------------------------------|
+| Point to one object without keeping it alive, and get it back later           | `WeakReference`                                    |
+| Check if some object is the same one you had before, without keeping it alive | `WeakReference`, with `identical(ref.target, obj)` |
+| Run some code when an object is garbage-collected                             | `Finalizer`                                        |
+| Attach values to objects, and have those values go away with the objects      | `WeakMap`                                          |
+| Cache expensive calculations over immutable state                             | The cache functions (see below)                    |
+| Iterate over the entries, or know how many there are                          | A regular `Map` (see note 6 below)                 |
+
+### Notes
+
+1. Object keys are compared by **identity**, not by `operator ==`. Two different objects
+   that are equal are two different keys.
+
+2. If you use `null`, a number, a boolean, a String or a record as a key, the `WeakMap`
+   acts like a regular map for that key: these values are never garbage-collected, and
+   they are compared by equality (`==`). Constant objects (`const`) are compared by
+   identity, and are never garbage-collected either.
+
+   Note, a Dart record key keeps the objects inside it alive, until you remove it or clear
+   the map. Records can't be weak keys, because they have no identity. If you need a weak
+   composite key, nest the maps instead. The entry then goes away when **either** object
+   is garbage-collected:
+
+   ```dart
+   // Instead of WeakMap<(User, Doc), Result>
+   var map = WeakMap<User, WeakMap<Doc, Result>>();
+   ```
+
+3. Setting a key to `null` is the same as removing it: `map[user] = null` is the same as
+   `map.remove(user)`. For the same reason, `contains` returns `false` for keys set to
+   `null`.
+
+4. `map[key]` and `map.get(key)` return `null` if the key doesn't exist. Use
+   `map.getOrThrow(key)` to throw a `StateError` instead.
+
+5. `map[key] = value` is the same as `map.add(key: key, value: value)`.
+
+6. A `WeakMap` has no `length`, `keys`, `values` or iteration, on purpose. Whether an
+   entry is still there depends on when the garbage-collector runs, which is
+   unpredictable. And since you can only look up an entry while you still have its key,
+   which means the key is alive, you can never observe an entry disappearing. This keeps
+   your program's behavior the same, no matter when (or if) the garbage-collector runs.
 
 <br>
 
 ## Cache
 
-Suppose you have some **immutable** information, which we call "state", and some parameters. We want
-to perform some expensive process (calculation, selection filtering etc) over the state, and we want
-to cache the result.
+Suppose you have some **immutable** information, which we call "state", and some
+parameters. We want to perform some expensive process (calculation, selection filtering
+etc) over the state, and we want to cache the result.
 
-For example, suppose you want to filter an **immutable list of millions of users**, to create a new
-list with only the names that start with some text. You could filter the users list to remove all
-other names, like this:
+For example, suppose you want to filter an **immutable list of millions of users**, to
+create a new list with only the names that start with some text. You could filter the
+users list to remove all other names, like this:
 
-```     
-List<User> filter(String text) => users.where((user)=>user.name.startsWith(text)).toList();
-```                                                                                           
+```dart
+List<User> filter(String text) =>
+    users.where((user) => user.name.startsWith(text)).toList();
+```
 
 This is an expensive process, so you may want to cache the filtered list.
 
 In this example, we have a single state and a single parameter, so we're going to use
 the `cache1state_1param` method:
 
-```                                                    
+```
 static List<User> filter(Users users, String text)
-   => _filter(users)(text);
+  => _filter(users)(text);
 
-static final _filter = cache1state_1param(
-        (Users users) 
-           => (String text) 
-              => users.where((user)=>user.name.startsWith(text)).toList());
-```  
+static final _filter = cache1state_1param((Users users) => (String text)
+  => users.where((user)=>user.name.startsWith(text)).toList());
+```
 
-The above code will calculate the filtered list only once, and then return it when the `filter`
-function is called again with the same `users` and `text`.
+The above code will calculate the filtered list only once, and then return it when the
+`filter` function is called again with the same `users` and `text`.
 
-If the function is called with a **different** `users` and/or `text`, it will recalculate and cache
-the new result.
+If the function is called with a **different** `users` and/or `text`, it will recalculate
+and cache the new result.
 
-However, it treats the state and the parameter differently. If you call the function while keeping
-the **same state** and changing only the parameter, it will cache all the results, one for each
-parameter.
+However, it treats the state and the parameter differently. If you call the function while
+keeping the **same state** and changing only the parameter, it will cache all the results,
+one for each parameter.
 
-However, as soon as you call the function with a **changed state**, it will delete all of its
-previous cached information, since it understands that they are no longer useful.
+However, as soon as you call the function with a **changed state**, it will delete all of
+its previous cached information, since it understands that they are no longer useful.
 
-And even if you don't call that function ever again, it will delete the cached information if it
-detects that the state is no longer used in other parts of the program. In other words, it keeps the
-cached information in a weak-map, so that the cache will not hold to old information and have a
-negative impact in memory usage.
+And even if you don't call that function ever again, it will delete the cached information
+if it detects that the state is no longer used in other parts of the program. In other
+words, it keeps the cached information in a weak-map, so that the cache will not hold to
+old information and have a negative impact in memory usage.
 
-Some functions, marked with an "x", also let you pass some extra information which is not used in
-any way to decide whether the cache should be used/recalculated/evicted.
+States are compared by **identity** if they are objects, and by equality if they are
+numbers, Strings, booleans, records or `null`. Parameters are compared by equality (`==`).
+This is why the state must be immutable: if you change the contents of the state object,
+the cache can't notice it, and will keep returning the old result.
+If a state is a record with objects inside, those objects are kept alive until the state
+changes.
 
-For the moment, the following 10 methods are provided, which combine 1, 2 or 3 states with 0, 1 or 2
-parameters, and possibly some extra information:
+Some functions, marked with an "x", also let you pass some extra information which is not
+used in any way to decide whether the cache should be used/recalculated/evicted.
+
+For the moment, the following 11 methods are provided, which combine 1, 2 or 3 states with
+0, 1, 2 or 3 parameters, and possibly some extra information:
 
 ```
 cache1state((state) => () => ...);
@@ -202,23 +259,25 @@ cache1state_2params((state) => (parameter1, parameter2) => ...);
 cache2states((state1, state2) => () => ...);
 cache2states_1param((state1, state2) => (parameter) => ...);
 cache2states_2params((state1, state2) => (parameter1, parameter2) => ...);
+cache2states_3params((state1, state2) => (parameter1, parameter2, parameter3) => ...);
 cache3states((state1, state2, state3) => () => ...);
 cache1state_0params_x((state1, extra) => () => ...);
 cache2states_0params_x((state1, state2, extra) => () => ...);
 cache3states_0params_x((state1, state2, state3, extra) => () => ...);
-```    
+```
 
-I have created only those above, because for my own usage I never required more than that. Please,
-open an <a href="https://github.com/marcglasberg/weak_map/issues">issue</a>
+I have created only those above, because for my own usage I never required more than that.
+Please, open an <a href="https://github.com/marcglasberg/weak_map/issues">issue</a>
 to ask for more variations in case you feel the need.
 
 **Note:** These cache functions are similar to the "createSelector" functions found in the
-<a href="https://pub.dev/packages/reselect">reselect</a> package. The differences are: First, here
-you can keep any number of cached results for each function, one for each time the function is
-called with the same state and different parameters. Meanwhile, the reselect package only keeps a
-single cached result per function. Second, here it discards the cached information when the state
-changes or is no longer used in other parts of the program. Meanwhile, the reselect package will
-always keep the states and cached results in memory.
+<a href="https://pub.dev/packages/reselect">reselect</a> package. The differences are:
+First, here you can keep any number of cached results for each function, one for each time
+the function is called with the same state and different parameters. Meanwhile, the
+reselect package only keeps a single cached result per function. Second, here it discards
+the cached information when the state changes or is no longer used in other parts of the
+program. Meanwhile, the reselect package will always keep the states and cached results in
+memory.
 
 <br>
 

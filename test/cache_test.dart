@@ -180,12 +180,6 @@ void main() {
                   .toList();
             });
 
-    // TODO: MARCELO: Refazer este teste.
-    // Originalmente era: expect(identical("a", otherA), isFalse);
-    // With no other changes except
-    // flutter channel stable 1.22.5 => flutter channel beta  1.24.0-10.2.pre
-    // (Dart version 2.10.4)         => (Dart version 2.12.0 (build 2.12.0-29.10.beta))
-    // suddenly this isTrue
     String otherA = "a" ""; // Concatenate.
     expect(identical("a", otherA), isTrue);
 
@@ -1220,6 +1214,344 @@ void main() {
     expect(calls2, 1);
   });
 
+  test('cache1state_2params: Parameters are compared by equality, not identity.', () {
+    //
+    var calls = 0;
+    var selector = cache1state_2params((Object state) => (Object p1, Object p2) {
+          calls++;
+          return [p1, p2];
+        });
+
+    var state = Object();
+    var result1 = selector(state)(_Value(1), (1, ["x"].join()));
+    var result2 = selector(state)(_Value(1), (1, ["x"].join()));
+    expect(identical(result1, result2), isTrue);
+    expect(calls, 1);
+
+    selector(state)(_Value(2), (1, "x"));
+    selector(state)(_Value(1), (2, "x"));
+    expect(calls, 3);
+  });
+
+  test('cache2states_2params: Parameters are compared by equality, not identity.', () {
+    //
+    var calls = 0;
+    var selector = cache2states_2params((Object s1, Object s2) => (Object p1, Object p2) {
+          calls++;
+          return [p1, p2];
+        });
+
+    var s1 = Object();
+    var s2 = Object();
+    var result1 = selector(s1, s2)(_Value(1), (1, ["x"].join()));
+    var result2 = selector(s1, s2)(_Value(1), (1, ["x"].join()));
+    expect(identical(result1, result2), isTrue);
+    expect(calls, 1);
+
+    selector(s1, s2)(_Value(2), (1, "x"));
+    selector(s1, s2)(_Value(1), (2, "x"));
+    expect(calls, 3);
+  });
+
+  test('cache2states_3params: Parameters are compared by equality, not identity.', () {
+    //
+    var calls = 0;
+    var selector =
+        cache2states_3params((Object s1, Object s2) => (Object p1, Object p2, Object? p3) {
+              calls++;
+              return [p1, p2, p3];
+            });
+
+    var s1 = Object();
+    var s2 = Object();
+    var result1 = selector(s1, s2)(_Value(1), (1, ["x"].join()), null);
+    var result2 = selector(s1, s2)(_Value(1), (1, ["x"].join()), null);
+    expect(identical(result1, result2), isTrue);
+    expect(calls, 1);
+
+    selector(s1, s2)(_Value(2), (1, "x"), null);
+    selector(s1, s2)(_Value(1), (2, "x"), null);
+    selector(s1, s2)(_Value(1), (1, "x"), _Value(1));
+    expect(calls, 4);
+  });
+
+  test('Parameters that are equal but of different types (1 and 1.0) are the same parameter.', () {
+    // This is the same behavior as a regular Dart map.
+    var calls = 0;
+    var selector = cache1state_1param((Object state) => (num param) {
+          calls++;
+          return [param];
+        });
+
+    var state = Object();
+    var result1 = selector(state)(1);
+    var result2 = selector(state)(1.0);
+    expect(identical(result1, result2), isTrue);
+    expect(calls, 1);
+  });
+
+  test('A cached function can call itself with other parameters (re-entrancy).', () {
+    //
+    // Each cache calculates Fibonacci numbers recursively, by calling itself.
+    var calls = 0;
+    late int Function(int) fib;
+    int calc(int n) {
+      calls++;
+      return (n < 2) ? n : fib(n - 1) + fib(n - 2);
+    }
+
+    var state1 = Object();
+    var state2 = "state";
+
+    var c1 = cache1state_1param((Object s) => (int n) => calc(n));
+    var c2 = cache1state_2params((Object s) => (int n, int unused) => calc(n));
+    var c3 = cache2states_1param((Object s1, String s2) => (int n) => calc(n));
+    var c4 = cache2states_2params((Object s1, String s2) => (int n, int unused) => calc(n));
+    var c5 = cache2states_3params(
+        (Object s1, String s2) => (int n, int unused1, int unused2) => calc(n));
+
+    var fibs = <String, int Function(int)>{
+      'cache1state_1param': (n) => c1(state1)(n),
+      'cache1state_2params': (n) => c2(state1)(n, 0),
+      'cache2states_1param': (n) => c3(state1, state2)(n),
+      'cache2states_2params': (n) => c4(state1, state2)(n, 0),
+      'cache2states_3params': (n) => c5(state1, state2)(n, 0, 0),
+    };
+
+    for (var entry in fibs.entries) {
+      calls = 0;
+      fib = entry.value;
+      expect(fib(30), 832040, reason: entry.key);
+      // Each value of n is calculated only once.
+      expect(calls, 31, reason: entry.key);
+
+      // And all of them stay cached.
+      expect(fib(30), 832040, reason: entry.key);
+      expect(fib(15), 610, reason: entry.key);
+      expect(calls, 31, reason: entry.key);
+    }
+  });
+
+  test('The cached function is not called until the returned function is called.', () {
+    //
+    var calls = 0;
+    var selector = cache2states_1param((String s1, String s2) {
+      calls++;
+      return (int p) => "$s1$s2$p";
+    });
+
+    var function = selector("A", "B");
+    expect(calls, 0);
+    expect(function(1), "AB1");
+    expect(calls, 1);
+  });
+
+  group('All cache functions.', () {
+    //
+    for (var cacheCase in _cacheCases) {
+      var name = cacheCase.name;
+      var n = cacheCase.numberOfStates;
+
+      test('$name: With the same states, calculates only once and returns the same result.', () {
+        var calls = 0;
+        var call = cacheCase.create(onCall: () => calls++);
+        var states = [for (var i = 0; i < n; i++) Object()];
+
+        var result1 = call(states);
+        var result2 = call(states);
+        var result3 = call(List.of(states)); // Another list, with the same states.
+        expect(result1, _expectedResult(cacheCase, states));
+        expect(identical(result1, result2), isTrue);
+        expect(identical(result1, result3), isTrue);
+        expect(calls, 1);
+      });
+
+      for (var index = 0; index < n; index++) {
+        //
+        test(
+            '$name: Changing state ${index + 1} recalculates, '
+            'and only the last states are remembered.', () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var states = [for (var i = 0; i < n; i++) Object()];
+          var otherStates = _replace(states, index, Object());
+
+          var result1 = call(states);
+          var result2 = call(otherStates);
+          expect(result2, _expectedResult(cacheCase, otherStates));
+          expect(calls, 2);
+
+          // Going back to the previous states recalculates.
+          var result3 = call(states);
+          expect(result3, _expectedResult(cacheCase, states));
+          expect(identical(result1, result3), isFalse);
+          expect(calls, 3);
+        });
+
+        test('$name: State ${index + 1} is compared by identity, if it is an object.', () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var states = _replace([for (var i = 0; i < n; i++) Object()], index, _Value(1));
+          var equalStates = _replace(states, index, _Value(1));
+          expect(equalStates, states);
+
+          call(states);
+          call(equalStates);
+          expect(calls, 2);
+          call(equalStates);
+          expect(calls, 2);
+        });
+
+        test(
+            '$name: State ${index + 1} is compared by equality, '
+            'if it is a String, number, boolean, record or null.', () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var objects = [for (var i = 0; i < n; i++) Object()];
+
+          // Each value is created again for each call, so that it's equal,
+          // but not necessarily identical.
+          var values = <Object? Function()>[
+            () => ["A", "B"].join(),
+            () => int.parse("123"),
+            () => double.parse("1.5"),
+            () => bool.parse("true"),
+            () => (int.parse("1"), ["x"].join()),
+            () => (name: ["x"].join(), age: int.parse("3")),
+            () => null,
+          ];
+
+          var expectedCalls = 0;
+          for (var value in values) {
+            var result1 = call(_replace(objects, index, value()));
+            var result2 = call(_replace(objects, index, value()));
+            expectedCalls++;
+            expect(calls, expectedCalls, reason: "Value: ${value()}");
+            expect(identical(result1, result2), isTrue);
+            expect(result1, _expectedResult(cacheCase, _replace(objects, index, value())));
+          }
+        });
+
+        test('$name: State ${index + 1} can change between objects and values.', () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var objects = [for (var i = 0; i < n; i++) Object()];
+          var obj = Object();
+
+          var sequence = <Object?>[obj, "A", null, obj, 1, obj, (1, 2), null, "A"];
+          for (var i = 0; i < sequence.length; i++) {
+            var states = _replace(objects, index, sequence[i]);
+            expect(call(states), _expectedResult(cacheCase, states));
+            expect(call(states), _expectedResult(cacheCase, states));
+            expect(calls, i + 1);
+          }
+        });
+      }
+
+      if (n > 1) {
+        test('$name: The same object can be used as more than one state.', () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var obj = Object();
+          var states = [for (var i = 0; i < n; i++) obj];
+
+          expect(call(states), _expectedResult(cacheCase, states));
+          expect(call(states), _expectedResult(cacheCase, states));
+          expect(calls, 1);
+
+          // Using another object in one of the positions is a change.
+          var otherStates = _replace(states, n - 1, Object());
+          expect(call(otherStates), _expectedResult(cacheCase, otherStates));
+          expect(calls, 2);
+        });
+      }
+
+      if (cacheCase.hasParams) {
+        test('$name: While the states are the same, the results for all parameters are kept.',
+            () {
+          var calls = 0;
+          var call = cacheCase.create(onCall: () => calls++);
+          var states = [for (var i = 0; i < n; i++) Object()];
+
+          var results = [for (var p = 0; p < 5; p++) call(states, p)];
+          expect(calls, 5);
+          for (var p = 0; p < 5; p++) {
+            expect(results[p], _expectedResult(cacheCase, states, p));
+            expect(identical(call(states, p), results[p]), isTrue);
+          }
+          expect(calls, 5);
+
+          // Changing the states forgets the results for all parameters.
+          var otherStates = [for (var i = 0; i < n; i++) Object()];
+          call(otherStates, 0);
+          expect(calls, 6);
+          for (var p = 0; p < 5; p++) {
+            expect(identical(call(states, p), results[p]), isFalse);
+          }
+        });
+      }
+
+      test(
+          '$name: If the function throws, the error is propagated, '
+          'and the next call recalculates.', () {
+        var calls = 0;
+        var shouldThrow = true;
+        var call = cacheCase.create(onCall: () {
+          calls++;
+          if (shouldThrow) throw StateError("Failed");
+        });
+        var states = [for (var i = 0; i < n; i++) Object()];
+
+        // Throws on the first call.
+        expect(() => call(states), throwsStateError);
+        expect(calls, 1);
+
+        // The next call with the same states recalculates, and then caches.
+        shouldThrow = false;
+        expect(call(states), _expectedResult(cacheCase, states));
+        expect(call(states), _expectedResult(cacheCase, states));
+        expect(calls, 2);
+      });
+
+      for (var index = 0; index < n; index++) {
+        //
+        test(
+            '$name: If the function throws after state ${index + 1} changes, '
+            'the next call recalculates with the new states.', () {
+          var calls = 0;
+          var shouldThrow = false;
+          var call = cacheCase.create(onCall: () {
+            calls++;
+            if (shouldThrow) throw StateError("Failed");
+          });
+
+          // The new state may be an object or a value.
+          for (var value in <Object? Function()>[() => Object(), () => "A", () => null]) {
+            calls = 0;
+            var states = [for (var i = 0; i < n; i++) Object()];
+            var otherStates = _replace(states, index, value());
+
+            shouldThrow = false;
+            expect(call(states), _expectedResult(cacheCase, states));
+
+            // Fails with the new states.
+            shouldThrow = true;
+            expect(() => call(otherStates), throwsStateError);
+
+            // The next call with the new states recalculates, and then caches.
+            shouldThrow = false;
+            expect(call(otherStates), _expectedResult(cacheCase, otherStates));
+            expect(call(otherStates), _expectedResult(cacheCase, otherStates));
+            expect(calls, 3);
+
+            // The previous states work too.
+            expect(call(states), _expectedResult(cacheCase, states));
+          }
+        });
+      }
+    }
+  });
+
   group('Garbage-collection.', () {
     //
     for (var cacheCase in _cacheCases) {
@@ -1271,6 +1603,55 @@ void main() {
         });
       }
 
+      test(
+          '$name: When the states change, the previous cached result is garbage-collected, '
+          'even if the previous states are still in use.', () {
+        var call = cacheCase.create();
+        var states = [for (var i = 0; i < n; i++) Object()];
+        var resultRef = _callAndGetWeakResult(call, states);
+
+        call([for (var i = 0; i < n; i++) Object()]);
+        expect(isGarbageCollected(resultRef), isTrue);
+        expect(states, hasLength(n));
+      });
+
+      test(
+          '$name: When the cache itself is no longer used, the cached result is '
+          'garbage-collected, even if the states are still in use.', () {
+        var states = [for (var i = 0; i < n; i++) Object()];
+        var resultRef = _callDroppedCache(cacheCase, states);
+        expect(isGarbageCollected(resultRef), isTrue);
+        expect(states, hasLength(n));
+      });
+
+      if (cacheCase.hasParams) {
+        test(
+            '$name: While the states are in use, the results for all parameters '
+            'are not garbage-collected.', () {
+          var call = cacheCase.create();
+          var states = [for (var i = 0; i < n; i++) Object()];
+          var refs = [for (var p = 0; p < 3; p++) _callAndGetWeakResult(call, states, p)];
+          for (var p = 0; p < 3; p++) {
+            expect(isGarbageCollected(refs[p], maxRounds: 200), isFalse);
+            expect(identical(call(states, p), refs[p].target), isTrue);
+          }
+        });
+
+        test(
+            '$name: When the states change, the results for all parameters are '
+            'garbage-collected, even if the previous states are still in use.', () {
+          var call = cacheCase.create();
+          var states = [for (var i = 0; i < n; i++) Object()];
+          var refs = [for (var p = 0; p < 3; p++) _callAndGetWeakResult(call, states, p)];
+
+          call([for (var i = 0; i < n; i++) Object()]);
+          for (var ref in refs) {
+            expect(isGarbageCollected(ref), isTrue);
+          }
+          expect(states, hasLength(n));
+        });
+      }
+
       test('$name: While the states are in use, the cached result is not garbage-collected.', () {
         var call = cacheCase.create();
         var states = [for (var i = 0; i < n; i++) Object()];
@@ -1279,6 +1660,31 @@ void main() {
         expect(identical(call(states), resultRef.target), isTrue);
       });
     }
+
+    test('The extra information is not kept alive by the cache.', () {
+      var state1 = Object();
+      var state2 = Object();
+      var state3 = Object();
+
+      var cache1 = cache1state_0params_x((Object s1, Object x) => () => [s1]);
+      var cache2 = cache2states_0params_x((Object s1, Object s2, Object x) => () => [s1, s2]);
+      var cache3 = cache3states_0params_x(
+          (Object s1, Object s2, Object s3, Object x) => () => [s1, s2, s3]);
+
+      // The extra information used to calculate the result.
+      var ref1 = _callWithNewExtra((x) => cache1(state1, x)());
+      var ref2 = _callWithNewExtra((x) => cache2(state1, state2, x)());
+      var ref3 = _callWithNewExtra((x) => cache3(state1, state2, state3, x)());
+
+      // The extra information used when the result was read from the cache.
+      var ref4 = _callWithNewExtra((x) => cache1(state1, x)());
+      var ref5 = _callWithNewExtra((x) => cache2(state1, state2, x)());
+      var ref6 = _callWithNewExtra((x) => cache3(state1, state2, state3, x)());
+
+      for (var ref in [ref1, ref2, ref3, ref4, ref5, ref6]) {
+        expect(isGarbageCollected(ref), isTrue);
+      }
+    });
   },
       // Garbage-collection can't be observed synchronously in JavaScript.
       testOn: 'vm');
@@ -1296,68 +1702,117 @@ class _Value {
   int get hashCode => value.hashCode;
 }
 
-/// Calls a cached function with the given states, and returns its result.
-typedef _CachedCall = Object Function(List<Object> states);
+/// Calls a cached function with the given states (and with the given [param],
+/// for the cache functions that have parameters), and returns its result.
+typedef _CachedCall = Object Function(List<Object?> states, [int param]);
 
 class _CacheCase {
   final String name;
   final int numberOfStates;
+  final bool hasParams;
 
-  /// Creates a new cache. The cached result references all the states.
-  final _CachedCall Function() create;
+  /// Creates a new cache. The cached result is a new list that contains all the
+  /// states, followed by all the parameters (if any). The optional [onCall] is
+  /// called each time the result is actually calculated (not read from the cache).
+  final _CachedCall Function({void Function()? onCall}) create;
 
-  _CacheCase(this.name, this.numberOfStates, this.create);
+  _CacheCase(this.name, this.numberOfStates, this.create, {this.hasParams = false});
 }
 
 final _cacheCases = [
-  _CacheCase('cache1state', 1, () {
-    var cache = cache1state((Object s1) => () => [s1]);
-    return (s) => cache(s[0])();
+  _CacheCase('cache1state', 1, ({onCall}) {
+    var cache = cache1state((Object? s1) => () {
+          onCall?.call();
+          return [s1];
+        });
+    return (s, [p = 1]) => cache(s[0])();
   }),
-  _CacheCase('cache1state_1param', 1, () {
-    var cache = cache1state_1param((Object s1) => (int p1) => [s1, p1]);
-    return (s) => cache(s[0])(1);
+  _CacheCase('cache1state_1param', 1, hasParams: true, ({onCall}) {
+    var cache = cache1state_1param((Object? s1) => (int p1) {
+          onCall?.call();
+          return [s1, p1];
+        });
+    return (s, [p = 1]) => cache(s[0])(p);
   }),
-  _CacheCase('cache1state_2params', 1, () {
-    var cache = cache1state_2params((Object s1) => (int p1, int p2) => [s1, p1, p2]);
-    return (s) => cache(s[0])(1, 2);
+  _CacheCase('cache1state_2params', 1, hasParams: true, ({onCall}) {
+    var cache = cache1state_2params((Object? s1) => (int p1, int p2) {
+          onCall?.call();
+          return [s1, p1, p2];
+        });
+    return (s, [p = 1]) => cache(s[0])(p, p + 1);
   }),
-  _CacheCase('cache2states', 2, () {
-    var cache = cache2states((Object s1, Object s2) => () => [s1, s2]);
-    return (s) => cache(s[0], s[1])();
+  _CacheCase('cache2states', 2, ({onCall}) {
+    var cache = cache2states((Object? s1, Object? s2) => () {
+          onCall?.call();
+          return [s1, s2];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1])();
   }),
-  _CacheCase('cache2states_1param', 2, () {
-    var cache = cache2states_1param((Object s1, Object s2) => (int p1) => [s1, s2, p1]);
-    return (s) => cache(s[0], s[1])(1);
+  _CacheCase('cache2states_1param', 2, hasParams: true, ({onCall}) {
+    var cache = cache2states_1param((Object? s1, Object? s2) => (int p1) {
+          onCall?.call();
+          return [s1, s2, p1];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1])(p);
   }),
-  _CacheCase('cache2states_2params', 2, () {
-    var cache =
-        cache2states_2params((Object s1, Object s2) => (int p1, int p2) => [s1, s2, p1, p2]);
-    return (s) => cache(s[0], s[1])(1, 2);
+  _CacheCase('cache2states_2params', 2, hasParams: true, ({onCall}) {
+    var cache = cache2states_2params((Object? s1, Object? s2) => (int p1, int p2) {
+          onCall?.call();
+          return [s1, s2, p1, p2];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1])(p, p + 1);
   }),
-  _CacheCase('cache2states_3params', 2, () {
-    var cache = cache2states_3params(
-        (Object s1, Object s2) => (int p1, int p2, int p3) => [s1, s2, p1, p2, p3]);
-    return (s) => cache(s[0], s[1])(1, 2, 3);
+  _CacheCase('cache2states_3params', 2, hasParams: true, ({onCall}) {
+    var cache = cache2states_3params((Object? s1, Object? s2) => (int p1, int p2, int p3) {
+          onCall?.call();
+          return [s1, s2, p1, p2, p3];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1])(p, p + 1, p + 2);
   }),
-  _CacheCase('cache3states', 3, () {
-    var cache = cache3states((Object s1, Object s2, Object s3) => () => [s1, s2, s3]);
-    return (s) => cache(s[0], s[1], s[2])();
+  _CacheCase('cache3states', 3, ({onCall}) {
+    var cache = cache3states((Object? s1, Object? s2, Object? s3) => () {
+          onCall?.call();
+          return [s1, s2, s3];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1], s[2])();
   }),
-  _CacheCase('cache1state_0params_x', 1, () {
-    var cache = cache1state_0params_x((Object s1, String x) => () => [s1, x]);
-    return (s) => cache(s[0], "x")();
+  _CacheCase('cache1state_0params_x', 1, ({onCall}) {
+    var cache = cache1state_0params_x((Object? s1, String x) => () {
+          onCall?.call();
+          return [s1];
+        });
+    return (s, [p = 1]) => cache(s[0], "x")();
   }),
-  _CacheCase('cache2states_0params_x', 2, () {
-    var cache = cache2states_0params_x((Object s1, Object s2, String x) => () => [s1, s2, x]);
-    return (s) => cache(s[0], s[1], "x")();
+  _CacheCase('cache2states_0params_x', 2, ({onCall}) {
+    var cache = cache2states_0params_x((Object? s1, Object? s2, String x) => () {
+          onCall?.call();
+          return [s1, s2];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1], "x")();
   }),
-  _CacheCase('cache3states_0params_x', 3, () {
-    var cache = cache3states_0params_x(
-        (Object s1, Object s2, Object s3, String x) => () => [s1, s2, s3, x]);
-    return (s) => cache(s[0], s[1], s[2], "x")();
+  _CacheCase('cache3states_0params_x', 3, ({onCall}) {
+    var cache = cache3states_0params_x((Object? s1, Object? s2, Object? s3, String x) => () {
+          onCall?.call();
+          return [s1, s2, s3];
+        });
+    return (s, [p = 1]) => cache(s[0], s[1], s[2], "x")();
   }),
 ];
+
+/// The result the cache functions in [_cacheCases] are expected to return.
+List<Object?> _expectedResult(_CacheCase cacheCase, List<Object?> states, [int param = 1]) {
+  var numberOfParams = switch (cacheCase.name) {
+    'cache1state_1param' || 'cache2states_1param' => 1,
+    'cache1state_2params' || 'cache2states_2params' => 2,
+    'cache2states_3params' => 3,
+    _ => 0,
+  };
+  return [...states, for (var i = 0; i < numberOfParams; i++) param + i];
+}
+
+/// Returns a copy of [states], where the state at [index] is replaced by [value].
+List<Object?> _replace(List<Object?> states, int index, Object? value) =>
+    [for (var i = 0; i < states.length; i++) (i == index) ? value : states[i]];
 
 /// Calls the cached function with [numberOfStates] states. The states in [keep]
 /// (indexed by their position) are used as given, while the others are new
@@ -1368,7 +1823,7 @@ List<WeakReference<Object>> _callWithNewStates(
   int numberOfStates, {
   required Map<int, Object> keep,
 }) {
-  var states = [for (var i = 0; i < numberOfStates; i++) keep[i] ?? Object()];
+  var states = <Object?>[for (var i = 0; i < numberOfStates; i++) keep[i] ?? Object()];
   var result = call(states);
 
   // Make sure the result is cached.
@@ -1376,15 +1831,31 @@ List<WeakReference<Object>> _callWithNewStates(
 
   return [
     for (var i = 0; i < numberOfStates; i++)
-      if (!keep.containsKey(i)) WeakReference(states[i]),
+      if (!keep.containsKey(i)) WeakReference(states[i]!),
     WeakReference(result),
   ];
 }
 
-/// Calls the cached function with the given states,
+/// Calls the cached function with the given states (and [param]),
 /// and returns a weak-reference to the cached result.
-WeakReference<Object> _callAndGetWeakResult(_CachedCall call, List<Object> states) {
-  var result = call(states);
-  expect(identical(call(states), result), isTrue);
+WeakReference<Object> _callAndGetWeakResult(_CachedCall call, List<Object?> states,
+    [int param = 1]) {
+  var result = call(states, param);
+  expect(identical(call(states, param), result), isTrue);
   return WeakReference(result);
+}
+
+/// Creates a new cache, calls it with the given states, and then drops the
+/// cache. Returns a weak-reference to the result.
+WeakReference<Object> _callDroppedCache(_CacheCase cacheCase, List<Object?> states) {
+  var call = cacheCase.create();
+  return _callAndGetWeakResult(call, states);
+}
+
+/// Calls [call] with some new extra information which is not referenced
+/// anywhere else, and returns a weak-reference to that extra information.
+WeakReference<Object> _callWithNewExtra(void Function(Object extra) call) {
+  var extra = Object();
+  call(extra);
+  return WeakReference(extra);
 }

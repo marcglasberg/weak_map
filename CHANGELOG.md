@@ -2,13 +2,32 @@
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 4.1.0
+
+* `WeakContainer` is now deprecated. It was created when Dart had no weak
+  references. Use Dart's native `WeakReference` instead: replace
+  `WeakContainer(obj).contains(x)` with `identical(WeakReference(obj).target, x)`.
+  It will be removed in a future version.
+
+* The cache functions now use a `WeakReference` internally to remember the
+  states, instead of creating one `Expando` per state. Same behavior, but faster.
+
+* Fixed the cache functions when the cached function throws an error. Before the fix,
+  the next call after an error with the same states could return `null`, or throw a
+  `LateInitializationError` or a null-check error, instead of recalculating.
+  Now the error is propagated, and the next call recalculates.
+
+* Fixed `cache2states_1param`, `cache2states_2params` and `cache2states_3params`
+  crashing when the cached function calls itself with other parameters (for example, a
+  memoized recursive function).
+
 ## 4.0.2
 
-* Fixed unsafe cast. 
+* Fixed unsafe cast.
 
 * Fixed `getOrThrow` not throwing a `StateError` for missing object keys.
 
-* Fixed records crashing `WeakMap`, `WeakContainer` and the cache functions.
+* Fixed Dart records crashing `WeakMap`, `WeakContainer` and the cache functions.
   Records are now treated like Strings and numbers (compared by equality).
   Requires Dart 3.0.0.
 

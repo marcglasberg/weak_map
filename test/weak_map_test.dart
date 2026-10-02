@@ -572,6 +572,119 @@ void main() {
     expect(map.contains((name: "x", age: 3)), false);
   });
 
+  test("Records with objects inside are compared by the equality of their fields.", () {
+    //
+    var map = WeakMap();
+    var obj = Object();
+
+    map[(_Value(1), 2)] = "A";
+    map[(obj, 1)] = "B";
+
+    // Equal fields (even if not identical) make equal records.
+    expect(map[(_Value(1), 2)], "A");
+    expect(map[(_Value(2), 2)], null);
+
+    expect(map[(obj, 1)], "B");
+    expect(map[(Object(), 1)], null);
+  });
+
+  test("Numbers that are equal but of different types (1 and 1.0) are the same key.", () {
+    // This is the same behavior as a regular Dart map.
+    var map = WeakMap();
+    map[1] = "A";
+    expect(map[1.0], "A");
+    map[2.0] = "B";
+    expect(map[2], "B");
+  });
+
+  test("The same object can be a key in more than one map.", () {
+    //
+    var map1 = WeakMap();
+    var map2 = WeakMap();
+    var obj = Object();
+
+    map1[obj] = 1;
+    map2[obj] = 2;
+    expect(map1[obj], 1);
+    expect(map2[obj], 2);
+
+    map1.clear();
+    expect(map1[obj], null);
+    expect(map2[obj], 2);
+  });
+
+  test("Weak-maps can be nested (a weak-map as the value of another weak-map).", () {
+    //
+    var outer = WeakMap<Object, WeakMap<Object, String>>();
+    var key1 = Object();
+    var key2 = Object();
+
+    outer[key1] = WeakMap()..[key2] = "A";
+    expect(outer[key1]![key2], "A");
+    expect(outer[key2], null);
+    expect(outer[key1]![key1], null);
+  });
+
+  test("A map can be used as its own key, or as its own value.", () {
+    //
+    var map = WeakMap();
+    map[map] = map;
+    expect(map[map], same(map));
+    map.remove(map);
+    expect(map.contains(map), false);
+  });
+
+  test("Many keys of all kinds.", () {
+    //
+    var map = WeakMap<Object, int>();
+    var objects = [for (var i = 0; i < 10000; i++) Object()];
+
+    for (var i = 0; i < objects.length; i++) {
+      map[objects[i]] = i;
+      map[i] = -i;
+      map["$i"] = i * 2;
+    }
+
+    for (var i = 0; i < objects.length; i++) {
+      expect(map[objects[i]], i);
+      expect(map[i], -i);
+      expect(map["$i"], i * 2);
+    }
+
+    // Removes half of them.
+    for (var i = 0; i < objects.length; i += 2) {
+      map.remove(objects[i]);
+      map.remove(i);
+      map.remove("$i");
+    }
+
+    for (var i = 0; i < objects.length; i++) {
+      var removed = i.isEven;
+      expect(map.contains(objects[i]), !removed);
+      expect(map.contains(i), !removed);
+      expect(map.contains("$i"), !removed);
+    }
+  });
+
+  test("The value can be of any type.", () {
+    //
+    var map = WeakMap();
+    var obj = Object();
+    var value = Object();
+
+    map[obj] = (1, 2);
+    expect(map[obj], (1, 2));
+
+    map[obj] = [1, 2];
+    expect(map[obj], [1, 2]);
+
+    map[obj] = value;
+    expect(map[obj], same(value));
+
+    map[obj] = obj; // The key itself.
+    expect(map[obj], same(obj));
+  });
+
   group("Garbage-collection.", () {
     //
     test("Sanity check: An object which is still referenced is not garbage-collected.", () {
@@ -643,6 +756,89 @@ void main() {
       expect(isGarbageCollected(valueRef, maxRounds: 200), isFalse);
       expect(map[key], same(valueRef.target));
     });
+
+    test(
+        "When the map is no longer used, its values are garbage-collected, "
+        "even if their keys are still in use.", () {
+      var key = Object();
+      var valueRef = _addNewValueToDroppedMap(key);
+      expect(isGarbageCollected(valueRef), isTrue);
+      expect(key, isNotNull);
+    });
+
+    test(
+        "When an object key is garbage-collected, "
+        "the entries of the other keys are not affected.", () {
+      var map = WeakMap();
+      var keptKey = Object();
+      var keptValueRef = _addNewValue(map, keptKey);
+      var refs = _addNewKeyAndValue(map);
+
+      expect(isGarbageCollected(refs.key), isTrue);
+      expect(isGarbageCollected(refs.value), isTrue);
+      expect(isGarbageCollected(keptValueRef, maxRounds: 200), isFalse);
+      expect(map[keptKey], same(keptValueRef.target));
+    });
+
+    test("Many object keys are all garbage-collected.", () {
+      var map = WeakMap();
+      var refs = _addManyNewKeysAndValues(map, 1000);
+      for (var ref in refs) {
+        expect(isGarbageCollected(ref), isTrue);
+      }
+    });
+
+    test(
+        "Values of String, number, boolean, null and record keys are not "
+        "garbage-collected while the map is in use (like a regular map).", () {
+      var map = WeakMap();
+      var refs = [
+        _addNewValue(map, "A"),
+        _addNewValue(map, 1),
+        _addNewValue(map, 1.5),
+        _addNewValue(map, true),
+        _addNewValue(map, null),
+        _addNewValue(map, (1, 2)),
+      ];
+      for (var ref in refs) {
+        expect(isGarbageCollected(ref, maxRounds: 200), isFalse);
+      }
+      expect(map["A"], same(refs[0].target));
+      expect(map[(1, 2)], same(refs[5].target));
+    });
+
+    test(
+        "A record key keeps the objects inside it alive, "
+        "because records act like a regular map.", () {
+      var map = WeakMap();
+      var objRef = _addRecordKeyWithNewObject(map);
+      expect(isGarbageCollected(objRef, maxRounds: 200), isFalse);
+      expect(map, isNotNull);
+    });
+
+    // Note: This can't be checked in the same test as the one above, because
+    // after the test reads the object (to check it's alive), the VM may keep
+    // it alive until the end of the test. A regular Dart map behaves the same.
+    test("Clearing the map lets the objects inside record keys be garbage-collected.", () {
+      var map = WeakMap();
+      var objRef = _addRecordKeyWithNewObject(map);
+      map.clear();
+      expect(isGarbageCollected(objRef), isTrue);
+    });
+
+    test("Removing a record key lets the objects inside it be garbage-collected.", () {
+      var map = WeakMap();
+      var objRef = _addRecordKeyWithNewObject(map);
+      map.remove(_recordKeyFor(objRef));
+      expect(isGarbageCollected(objRef), isTrue);
+    });
+
+    test("A const object key is never garbage-collected, so its value is kept.", () {
+      var map = WeakMap();
+      var valueRef = _addNewValue(map, const _Value(42));
+      expect(isGarbageCollected(valueRef, maxRounds: 200), isFalse);
+      expect(map[const _Value(42)], same(valueRef.target));
+    });
   },
       // Garbage-collection can't be observed synchronously in JavaScript.
       testOn: 'vm');
@@ -684,8 +880,39 @@ MapEntry<WeakReference<Object>, WeakReference<Object>> _addNewKeyAndValue(
 
 /// Adds a new value to the [map], for the given [key], without keeping it
 /// anywhere else, and returns a weak-reference to the value.
-WeakReference<Object> _addNewValue(WeakMap map, Object key) {
+WeakReference<Object> _addNewValue(WeakMap map, Object? key) {
   var value = Object();
   map[key] = value;
   return WeakReference(value);
 }
+
+/// Creates a new map, adds a new value to it for the given [key], and then
+/// drops the map. Returns a weak-reference to the value.
+WeakReference<Object> _addNewValueToDroppedMap(Object key) {
+  var map = WeakMap();
+  return _addNewValue(map, key);
+}
+
+/// Adds [count] new keys and values to the [map], without keeping them anywhere
+/// else, and returns weak-references to all of them.
+List<WeakReference<Object>> _addManyNewKeysAndValues(WeakMap map, int count) {
+  var refs = <WeakReference<Object>>[];
+  for (var i = 0; i < count; i++) {
+    var entry = _addNewKeyAndValue(map);
+    refs
+      ..add(entry.key)
+      ..add(entry.value);
+  }
+  return refs;
+}
+
+/// Adds a record key that contains a new object to the [map],
+/// and returns a weak-reference to that object.
+WeakReference<Object> _addRecordKeyWithNewObject(WeakMap map) {
+  var obj = Object();
+  map[(obj, 1)] = "A";
+  return WeakReference(obj);
+}
+
+/// Returns a record equal to the one added by [_addRecordKeyWithNewObject].
+(Object, int) _recordKeyFor(WeakReference<Object> objRef) => (objRef.target!, 1);

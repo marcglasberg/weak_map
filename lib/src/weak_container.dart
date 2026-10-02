@@ -1,57 +1,40 @@
-/// A weak-container is similar, but not exactly, a weak-reference to some object.
-/// Dart doesn't have real weak-references, so the best you can do here is to check
-/// that some object is the same you had before.
+import 'state_container.dart';
+
+/// **Deprecated:** Use Dart's native [WeakReference] instead.
 ///
-/// To create a weak-container:
+/// When this package was created, Dart had no weak-references, and this class
+/// was the closest thing to one: it lets you check if some object is the same
+/// you had before, without keeping that object alive. Since Dart 2.17, a
+/// [WeakReference] does the same, and more, because it also lets you get the
+/// object back while it's still alive:
+///
 /// ```
-/// var obj = Object();
-/// var ref = WeakContainer(obj);
-/// var someObj = Random().nextBool() ? obj : Object();
-/// print(ref.contains(someObj)); // True or false.
+/// // Before:
+/// var container = WeakContainer(obj);
+/// print(container.contains(someObj));
+///
+/// // Now:
+/// var ref = WeakReference(obj);
+/// print(identical(ref.target, someObj));
 /// ```
-/// This will print `true` if `someObj` is the same as the original `obj`,
-/// and will print `false` if it's a different object, compared by identity.
 ///
-/// If all references to the original `obj` have been destroyed,
-/// the weak-container will NOT prevent `obj` to be garbage-collected.
+/// Note a [WeakReference] can't hold null, numbers, booleans, Strings or records
+/// (it throws an [ArgumentError]). Those are never garbage-collected anyway, so
+/// you can keep them in a regular variable and compare them with `==`.
 ///
+@Deprecated("Use Dart's native WeakReference instead. "
+    "Replace `WeakContainer(obj).contains(x)` with `identical(WeakReference(obj).target, x)`. "
+    "This class will be removed in a future version.")
 class WeakContainer {
-  Expando? _expando;
-  Object? _value;
-  bool _isNull;
+  final StateContainer _container;
 
-  WeakContainer(Object? value)
-      : _expando = _allowedInExpando(value) ? _createExpando(value!) : null,
-        _value = _allowedInExpando(value) ? null : value,
-        _isNull = (value == null);
+  WeakContainer(Object? value) : _container = StateContainer(value);
 
-  bool contains(Object? value) {
-    if (value == null) {
-      return _isNull;
-    } else {
-      if (_value == value) {
-        return true;
-      } else {
-        return (_expando != null && //
-            _allowedInExpando(value) &&
-            _expando![value] == true);
-      }
-    }
-  }
+  /// Returns true if [value] is the same object this container was created
+  /// with (compared by identity), or an equal value if the container was
+  /// created with null, a number, a boolean, a String or a record.
+  bool contains(Object? value) => _container.contains(value);
 
-  void clear() {
-    _value = null;
-    _expando = null;
-    _isNull = false;
-  }
-
-  static Expando _createExpando(Object value) {
-    assert(_allowedInExpando(value));
-    var expando = Expando();
-    expando[value] = true;
-    return expando;
-  }
-
-  static bool _allowedInExpando(Object? value) =>
-      value is! String && value is! num && value is! bool && value is! Record && value != null;
+  /// After calling this method, [contains] always returns false.
+  void clear() => _container.clear();
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:test/test.dart';
 import 'package:weak_map/weak_map.dart';
 
@@ -210,6 +212,14 @@ void main() {
       var ref = _newObjectInContainer(containers);
       expect(isGarbageCollected(ref), isTrue);
       expect(containers, hasLength(1));
+    });
+
+    test("After its object is garbage-collected, the container does not contain null.", () {
+      var containers = <WeakContainer>[];
+      var ref = _newObjectInContainer(containers);
+      expect(isGarbageCollected(ref), isTrue);
+      expect(containers.single.contains(null), false);
+      expect(containers.single.contains(Object()), false);
     });
 
     test("While the object is alive, the container still contains it.", () {

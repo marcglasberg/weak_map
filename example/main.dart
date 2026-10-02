@@ -22,8 +22,14 @@ void main() {
   print('A exists in map = ${map.contains("A")}'); // A = false
 
   // 4)
-  print('\nvalue = WeakContainer("X")');
-  var value = WeakContainer("X");
-  print('Contains X = ${value.contains("X")}'); // Contains X = true
-  print('Contains Y = ${value.contains("Y")}'); // Contains Y = false
+  // Object keys are compared by identity, and are held weakly.
+  print('\nObject keys');
+  var objMap = WeakMap<Object, String>();
+  var key1 = Object();
+  var key2 = Object();
+  objMap[key1] = "metadata";
+  print('key1 = ${objMap[key1]}'); // key1 = metadata
+  print('key2 = ${objMap[key2]}'); // key2 = null
+  // When there are no other references to key1, it may be garbage-collected,
+  // together with its "metadata" value. The map does not keep it alive.
 }
